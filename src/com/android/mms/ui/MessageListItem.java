@@ -571,7 +571,7 @@ public class MessageListItem extends LinearLayout implements
                 buf.append(Html.fromHtml(body));
             } else {
                 if (hasSubject) {
-                    buf.append(" - ");
+                    buf.append("\n");
                 }
                 CharSequence smileyBody = parser.addSmileySpans(body);
                 if (enableEmojis) {
