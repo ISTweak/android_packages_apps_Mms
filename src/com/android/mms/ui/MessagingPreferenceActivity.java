@@ -119,8 +119,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // Unicode
     public static final String STRIP_UNICODE             = "pref_key_strip_unicode";
 
-	// Emoji and Unicode
-    public static final String ENABLE_EMOJIS             = "pref_key_enable_emojis";
+	// Unicode
     public static final String STRIP_UNICODE             = "pref_key_strip_unicode";
 
     // Menu entries
