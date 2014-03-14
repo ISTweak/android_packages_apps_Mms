@@ -194,4 +194,8 @@
     <string name="menu_conversation_options">Conversation options</string>
     <string name="pref_title_reset_convopt_to_default">Reset to default</string>
     <string name="pref_summary_reset_convopt_to_default">Resets the conversation setting to the application level setting</string>
+
+    <!-- Smart Dialer -->
+    <string name="pref_title_mms_smart_dialer">Smart call</string>
+    <string name="pref_summary_mms_smart_dialer">Automatically call the contact by moving your phone to your ear</string>
 </resources>
