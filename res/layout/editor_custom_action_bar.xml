@@ -50,7 +50,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginRight="20dip"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/action_bar_button_text_color"
+                android:textColor="#FFFFFF"
                 android:text="@string/template_save"
                 style="@android:style/Widget.Holo.ActionBar.TabText" />
 

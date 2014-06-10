@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2008 Esmertec AG.
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2013 SlimRoms Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +73,7 @@
                     android:linksClickable="false"
                     android:gravity="right"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/message_sent"
+                    android:textColor="#000000"
                     android:textSize="16sp" />
 
                 <LinearLayout
@@ -114,7 +113,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textColor="@color/text_hairline" />
+                        android:textColor="#ffcccccc" />
                 </LinearLayout>
 
                 <ViewStub android:id="@+id/mms_layout_view_stub"

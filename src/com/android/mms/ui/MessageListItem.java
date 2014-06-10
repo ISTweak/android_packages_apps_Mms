@@ -313,7 +313,7 @@ public class MessageListItem extends LinearLayout implements
             mMessageSpace.setVisibility(View.VISIBLE);
         } else {
             mAvatar.setVisibility(View.VISIBLE);
-            mMessageSpace.setVisibility(View.GONE);
+            mMessageSpace.setVisibility(View.INVISIBLE);
         }
     }
 

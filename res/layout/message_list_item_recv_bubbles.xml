@@ -21,7 +21,7 @@
 <com.android.mms.ui.MessageListItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/msg_list_item_recv"
-    android:background="@color/bubbles_bgcolor"
+    android:background="#ffbfbfbf"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
@@ -80,7 +80,7 @@
                     android:layout_height="wrap_content"
                     android:linksClickable="false"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/message_received"
+                    android:textColor="#ff000000"
                     android:textSize="16sp" />
 
                 <LinearLayout
@@ -127,7 +127,7 @@
                 android:paddingLeft="16dip"
                 android:paddingBottom="8dip"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/message_count_color" />
+                android:textColor="#66333333" />
             </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
