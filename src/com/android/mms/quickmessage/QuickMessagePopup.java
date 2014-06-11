@@ -134,8 +134,6 @@ public class QuickMessagePopup extends Activity implements
     private int mCurrentPage = -1; // Set to an invalid index
 
     // Configuration
-    private boolean mCloseClosesAll = false;
-    private boolean mWakeAndUnlock = false;
     private boolean mFullTimestamp = false;
     private int mUnicodeStripping = MessagingPreferenceActivity.UNICODE_STRIPPING_LEAVE_INTACT;
     private UnicodeFilter mUnicodeFilter = null;
@@ -163,8 +161,6 @@ public class QuickMessagePopup extends Activity implements
         // Get the preferences
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         mFullTimestamp = prefs.getBoolean(MessagingPreferenceActivity.FULL_TIMESTAMP, false);
-        mCloseClosesAll = prefs.getBoolean(MessagingPreferenceActivity.QM_CLOSE_ALL_ENABLED, false);
-        mWakeAndUnlock = prefs.getBoolean(MessagingPreferenceActivity.QM_LOCKSCREEN_ENABLED, false);
         mUnicodeStripping = prefs.getInt(MessagingPreferenceActivity.UNICODE_STRIPPING_VALUE,
                 MessagingPreferenceActivity.UNICODE_STRIPPING_LEAVE_INTACT);
         mInputMethod = Integer.parseInt(prefs.getString(MessagingPreferenceActivity.INPUT_TYPE,
@@ -202,7 +198,7 @@ public class QuickMessagePopup extends Activity implements
             public void onClick(View v) {
                 // If not closing all, close the current QM and move on
                 int numMessages = mMessageList.size();
-                if (mCloseClosesAll || numMessages == 1) {
+                if (numMessages == 1) {
                     clearNotification(true);
                     finish();
                 } else {
@@ -391,11 +387,6 @@ public class QuickMessagePopup extends Activity implements
      * If 'Wake and unlock' is enabled, this method will unlock the screen
      */
     private void unlockScreen() {
-        // See if the lock screen should be disabled
-        if (!mWakeAndUnlock) {
-            return;
-        }
-
         // See if the screen is locked or if no lock set and the screen is off
         // and get the wake lock to turn on the screen.
         boolean isScreenOn = mPowerManager.isScreenOn();

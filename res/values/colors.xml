@@ -31,7 +31,7 @@
     <color name="timestamp_color">#bf000000</color>
 
     <color name="original_bgcolor">#fff3f3f3</color>
-    <color name="bubbles_bgcolor">#ffbfbfbf</color>
+    <color name="bubbles_bgcolor">#fff2f2f2</color>
 
     <!-- the background color used for unread conversation -->
     <color name="unread_bgcolor">#ffffffff</color>

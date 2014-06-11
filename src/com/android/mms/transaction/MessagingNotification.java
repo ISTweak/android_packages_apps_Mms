@@ -1019,9 +1019,6 @@ public class MessagingNotification {
         noti.setDeleteIntent(PendingIntent.getBroadcast(context, 0,
                 sNotificationOnDeleteIntent, 0));
 
-        // See if QuickMessage pop-up support is enabled in preferences
-        boolean qmPopupEnabled = MessagingPreferenceActivity.getQuickMessageEnabled(context);
-
         // Set up the QuickMessage intent
         Intent qmIntent = null;
         if (mostRecentNotification.mIsSms && !privacyMode) {
@@ -1040,19 +1037,6 @@ public class MessagingNotification {
 
         if (!privacyMode) {
             if (messageCount == 1 || uniqueThreadCount == 1) {
-                // Add the Quick Reply action only if the pop-up won't be shown already
-                if (!qmPopupEnabled && qmIntent != null) {
-
-                    // This is a QR, we should show the keyboard when the user taps to reply
-                    qmIntent.putExtra(QuickMessagePopup.QR_SHOW_KEYBOARD_EXTRA, true);
-
-                    // Create the Quick reply pending intent and add it to the notification
-                    CharSequence qmText = context.getText(R.string.qm_quick_reply);
-                    PendingIntent qmPendingIntent = PendingIntent.getActivity(context, 0, qmIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT);
-                    noti.addAction(R.drawable.ic_reply, qmText, qmPendingIntent);
-                }
-
                 // Add the 'Mark as read' action
                 CharSequence markReadText = context.getText(R.string.qm_mark_read);
                 Intent mrIntent = new Intent();
@@ -1169,18 +1153,6 @@ public class MessagingNotification {
                         Log.d(TAG, "updateNotification: multi messages," +
                                 " showing inboxStyle notification");
                     }
-                }
-            }
-
-            // Trigger the QuickMessage pop-up activity if enabled
-            // But don't show the QuickMessage if the user is in a call or the phone is ringing
-            if (qmPopupEnabled && qmIntent != null) {
-                final TelephonyManager tm =
-                        (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-                boolean callIsActive = tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
-                if (!callIsActive && !ConversationList.mIsRunning && !ComposeMessageActivity.mIsRunning) {
-                    // Show the popup
-                    context.startActivity(qmIntent);
                 }
             }
         } else {
