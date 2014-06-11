@@ -48,10 +48,6 @@
     <!-- QUICKMESSAGE -->
     <string name="pref_quickmessage">クイックリプライ</string>
 
-    <!-- Use dark theme -->
-    <string name="pref_dark_theme_title">ダークテーマを使用</string>
-    <string name="pref_dark_theme_summary">非選択時はデフォルトのライトテーマを使用する</string>
-
     <!-- Show pop-up -->
     <string name="pref_quickmessage_title">ポップアップを表示</string>
     <string name="pref_quickmessage_summary">SMSメッセージ受信時にクイックメッセージポップアップを表示する</string>
