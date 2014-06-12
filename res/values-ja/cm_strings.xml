@@ -221,4 +221,8 @@
     <string name="pref_mms_color_green">グリーン</string>
     <string name="pref_mms_color_pink">ピンク</string>
 
+	<string name="menu_conversation_options">個別設定</string>
+	<string name="pref_title_reset_convopt_to_default">設定初期化</string>
+	<string name="pref_summary_reset_convopt_to_default">個別の設定をアプリケーションの設定に戻します</string>
+
 </resources>
