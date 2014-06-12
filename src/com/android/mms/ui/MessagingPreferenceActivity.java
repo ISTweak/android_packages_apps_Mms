@@ -167,6 +167,11 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // sure we notice if the user has changed the default SMS app.
     private boolean mIsSmsEnabled;
 
+    public static final String THEME_COLOR           = "pref_key_mms_theme";
+    private ListPreference mThemeColorPref;
+    private CharSequence[] mThemeColorEntries;
+    private CharSequence[] mThemeColorValues;
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -251,6 +256,10 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         // SMS Sending Delay
         mMessageSendDelayPref = (ListPreference) findPreference(SEND_DELAY_DURATION);
         mMessageSendDelayPref.setSummary(mMessageSendDelayPref.getEntry());
+
+        mThemeColorPref = (ListPreference) findPreference(THEME_COLOR);
+        mThemeColorEntries = getResources().getTextArray(R.array.pref_mms_theme_entries);
+        mThemeColorValues = getResources().getTextArray(R.array.pref_mms_theme_values);
 
         setMessagePreferences();
     }
@@ -380,6 +389,13 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mInputTypePref.setValue(inputType);
         adjustInputTypeSummary(mInputTypePref.getValue());
         mInputTypePref.setOnPreferenceChangeListener(this);
+
+        //
+        String themeType = sharedPreferences.getString(MessagingPreferenceActivity.THEME_COLOR,
+                Integer.toString(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE));
+        mThemeColorPref.setValue(themeType);
+        adjustThemeColorSummary(mThemeColorPref.getValue());
+        mThemeColorPref.setOnPreferenceChangeListener(this);
 
         mMessageSendDelayPref.setOnPreferenceChangeListener(this);
     }
@@ -581,6 +597,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         } else if (preference == mInputTypePref) {
             adjustInputTypeSummary((String)newValue);
             result = true;
+        } else if (preference == mThemeColorPref) {
+            adjustThemeColorSummary((String)newValue);
+            result = true;
         } else if (preference == mMessageSendDelayPref) {
             String value = (String) newValue;
             mMessageSendDelayPref.setValue(value);
@@ -599,6 +618,17 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             }
         }
         mInputTypePref.setSummary(R.string.pref_keyboard_unknown);
+    }
+
+    private void adjustThemeColorSummary(String value) {
+        int len = mThemeColorValues.length;
+        for (int i = 0; i < len; i++) {
+            if (mThemeColorValues[i].equals(value)) {
+                mThemeColorPref.setSummary(mThemeColorEntries[i]);
+                return;
+            }
+        }
+        mThemeColorPref.setSummary(R.string.pref_mms_theme_blue);
     }
 
     // For the group mms feature to be enabled, the following must be true:

@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.text.InputType;
 
 import com.android.mms.R;
 import com.google.android.mms.MmsException;
@@ -127,6 +128,7 @@ public class MessageListAdapter extends CursorAdapter {
     private boolean mSpeechBubbles;
     private boolean mFullTimestamp;
     private boolean mSentTimestamp;
+    private String mThemeColor;
 
     public MessageListAdapter(
             Context context, Cursor c, ListView listView,
@@ -149,6 +151,8 @@ public class MessageListAdapter extends CursorAdapter {
         mSpeechBubbles = prefs.getBoolean(MessagingPreferenceActivity.SPEECH_BUBBLES, false);
         mFullTimestamp = prefs.getBoolean(MessagingPreferenceActivity.FULL_TIMESTAMP, false);
         mSentTimestamp = prefs.getBoolean(MessagingPreferenceActivity.SENT_TIMESTAMP, false);
+        mThemeColor = prefs.getString(MessagingPreferenceActivity.THEME_COLOR, 
+                Integer.toString(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE));
 
         listView.setRecyclerListener(new AbsListView.RecyclerListener() {
             @Override
@@ -238,6 +242,29 @@ public class MessageListAdapter extends CursorAdapter {
             // We've got an mms item, pre-inflate the mms portion of the view
             view.findViewById(R.id.mms_layout_view_stub).setVisibility(View.VISIBLE);
         }
+        //mThemeColor
+        if ( boxType == INCOMING_ITEM_TYPE_SMS || boxType == INCOMING_ITEM_TYPE_MMS ) {
+            if ( mSpeechBubbles ) {
+                if (mThemeColor.equals("blue")) {
+                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_blue);
+                } else if (mThemeColor.equals("green")) {
+                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_green);
+                } else if (mThemeColor.equals("pink")) {
+                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_pink);
+                }
+            } else {
+            	/*
+                if (mThemeColor.equals("blue")) {
+                    view.findViewById(R.id.message_block).setBackgroundColor(0xFF6CCFF4);
+                } else if (mThemeColor.equals("green")) {
+                    view.findViewById(R.id.message_block).setBackgroundColor(0xFFCFE6B2);
+                } else if (mThemeColor.equals("pink")) {
+                    view.findViewById(R.id.message_block).setBackgroundColor(0xFFF4BEEA);
+                }
+                */
+            }
+        }
+
         return view;
     }
 
