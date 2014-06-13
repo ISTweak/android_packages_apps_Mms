@@ -72,7 +72,8 @@
                 android:background="@drawable/bubble_right"
                 android:orientation="vertical" >
 
-                <TextView android:id="@+id/text_view"
+                <TextView
+                    android:id="@+id/text_view"
                     android:autoLink="all"
                     android:paddingLeft="@dimen/message_item_text_padding_left_right"
                     android:paddingRight="@dimen/message_item_text_padding_left_right"

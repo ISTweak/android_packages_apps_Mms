@@ -31,7 +31,8 @@
         android:orientation="vertical" >
 
         <RelativeLayout
-            android:background="@drawable/hairline_left"
+            android:id="@+id/message_block"
+            android:background="@drawable/hairline_left_blue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -57,13 +58,13 @@
                 android:gravity="left">
 
             <LinearLayout
-                android:id="@+id/message_block"
                 android:minHeight="@dimen/avatar_width_height"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView android:id="@+id/text_view"
+                <TextView
+                    android:id="@+id/text_view"
                     android:autoLink="all"
                     android:paddingLeft="@dimen/message_item_text_padding_left_right"
                     android:paddingRight="@dimen/message_item_text_padding_left_right"
@@ -73,6 +74,7 @@
                     android:linksClickable="false"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="#000000"
+                    android:textColorLink="#ffc00000"
                     android:textSize="16sp" />
 
                 <LinearLayout
@@ -83,12 +85,11 @@
                     android:orientation="horizontal" >
 
                     <TextView android:id="@+id/date_view"
-                        android:background="@drawable/listitem_background"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingRight="3dip"
                         android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textColor="#ffcccccc" />
+                        android:textColor="#c0666666" />
 
                     <ImageView
                         android:id="@+id/locked_indicator"

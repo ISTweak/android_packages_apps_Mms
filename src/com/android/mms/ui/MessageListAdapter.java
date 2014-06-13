@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.text.InputType;
 
 import com.android.mms.R;
@@ -244,28 +245,62 @@ public class MessageListAdapter extends CursorAdapter {
         }
         //mThemeColor
         if ( boxType == INCOMING_ITEM_TYPE_SMS || boxType == INCOMING_ITEM_TYPE_MMS ) {
+        	setThemeColorIncoming(view);
+        	/*
             if ( mSpeechBubbles ) {
                 if (mThemeColor.equals("blue")) {
                     view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_blue);
+                    view.findViewById(R.id.text_view).setLinkTextColor(0xffc00000);
                 } else if (mThemeColor.equals("green")) {
                     view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_green);
+                    view.findViewById(R.id.text_view).setLinkTextColor(0xff40FFFF);
                 } else if (mThemeColor.equals("pink")) {
                     view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_pink);
+                    view.findViewById(R.id.text_view).setLinkTextColor(0xff40FFFF);
                 }
             } else {
-            	/*
                 if (mThemeColor.equals("blue")) {
-                    view.findViewById(R.id.message_block).setBackgroundColor(0xFF6CCFF4);
+                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_blue);
+                    view.findViewById(R.id.text_view).setLinkTextColor(0xffc00000);
                 } else if (mThemeColor.equals("green")) {
-                    view.findViewById(R.id.message_block).setBackgroundColor(0xFFCFE6B2);
+                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_green);
+                    view.findViewById(R.id.text_view).setLinkTextColor(0xff40FFFF);
                 } else if (mThemeColor.equals("pink")) {
-                    view.findViewById(R.id.message_block).setBackgroundColor(0xFFF4BEEA);
+                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_pink);
+                    view.findViewById(R.id.text_view).setLinkTextColor(0xff40FFFF);
                 }
-                */
             }
+            */
         }
 
         return view;
+    }
+
+    private void setThemeColorIncoming(View view) {
+    	TextView txt = (TextView)view.findViewById(R.id.text_view);
+        if ( mSpeechBubbles ) {
+            if (mThemeColor.equals("blue")) {
+                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_blue);
+                txt.setLinkTextColor(0xffc00000);
+            } else if (mThemeColor.equals("green")) {
+                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_green);
+                txt.setLinkTextColor(0xff0000c0);
+            } else if (mThemeColor.equals("pink")) {
+                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_pink);
+                txt.setLinkTextColor(0xff0000c0);
+            }
+        } else {
+            if (mThemeColor.equals("blue")) {
+                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_blue);
+                txt.setLinkTextColor(0xffc00000);
+            } else if (mThemeColor.equals("green")) {
+                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_green);
+                txt.setLinkTextColor(0xff0000c0);
+            } else if (mThemeColor.equals("pink")) {
+                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_pink);
+                txt.setLinkTextColor(0xff0000c0);
+            }
+        }
     }
 
     public MessageItem getCachedMessageItem(String type, long msgId, Cursor c) {
