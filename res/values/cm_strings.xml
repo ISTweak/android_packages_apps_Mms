@@ -96,8 +96,11 @@
     <string name="pref_extra_settings">Extra settings</string>
 
     <!-- Speech bubbles -->
-    <string name="pref_title_speech_bubbles">Speech bubbles</string>
-    <string name="pref_summary_speech_bubbles">Use speech bubbles theme</string>
+    <string name="pref_mms_color">Color select</string>
+	<string name="pref_mms_color_gray">Gray</string>
+    <string name="pref_mms_color_blue">Blue</string>
+    <string name="pref_mms_color_green">Green</string>
+    <string name="pref_mms_color_pink">Pink</string>
     <string name="pref_title_hide_message_avatars">Hide message avatars</string>
     <string name="pref_summary_hide_message_avatars">Hide avatars on message thread</string>
     <string name="pref_title_hide_list_avatars">Hide list avatars</string>
@@ -208,9 +211,5 @@
     <string name="pref_summary_mms_user_agent">Spoof phone as a different model for MMS</string>
     <string name="pref_mms_user_agent_custom_set">Custom User Agent set to:\n</string>
     
-    <!-- Theme -->
-    <string name="pref_mms_theme">Theme select</string>
-    <string name="pref_mms_theme_blue">Blue</string>
-    <string name="pref_mms_theme_green">Green</string>
-    <string name="pref_mms_theme_pink">Pink</string>
+
 </resources>

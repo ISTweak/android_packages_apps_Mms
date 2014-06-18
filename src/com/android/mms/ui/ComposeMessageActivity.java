@@ -429,8 +429,6 @@ public class ComposeMessageActivity extends Activity
     public final static String THREAD_ID = "thread_id";
     private final static String RECIPIENTS = "recipients";
 
-    private boolean mSpeechBubbles;
-
     @SuppressWarnings("unused")
     public static void log(String logMsg) {
         Thread current = Thread.currentThread();
@@ -2386,16 +2384,6 @@ public class ComposeMessageActivity extends Activity
         if (isSmsEnabled != mIsSmsEnabled) {
             mIsSmsEnabled = isSmsEnabled;
             invalidateOptionsMenu();
-        }
-
-        SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences((Context) ComposeMessageActivity.this);
-        boolean mSpeechBubbles = prefs.getBoolean(MessagingPreferenceActivity.SPEECH_BUBBLES, false);
-
-        if (mSpeechBubbles) {
-            mMsgListView.setBackgroundColor(getResources().getColor(R.color.bubbles_bgcolor));
-        } else {
-            mMsgListView.setBackgroundColor(getResources().getColor(R.color.original_bgcolor));
         }
 
         initFocus();

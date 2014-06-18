@@ -126,10 +126,9 @@ public class MessageListAdapter extends CursorAdapter {
     private Pattern mHighlight;
     private Context mContext;
     private boolean mIsGroupConversation;
-    private boolean mSpeechBubbles;
     private boolean mFullTimestamp;
     private boolean mSentTimestamp;
-    private String mThemeColor;
+    private String mBubblesColor;
 
     public MessageListAdapter(
             Context context, Cursor c, ListView listView,
@@ -149,10 +148,9 @@ public class MessageListAdapter extends CursorAdapter {
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        mSpeechBubbles = prefs.getBoolean(MessagingPreferenceActivity.SPEECH_BUBBLES, false);
         mFullTimestamp = prefs.getBoolean(MessagingPreferenceActivity.FULL_TIMESTAMP, false);
         mSentTimestamp = prefs.getBoolean(MessagingPreferenceActivity.SENT_TIMESTAMP, false);
-        mThemeColor = prefs.getString(MessagingPreferenceActivity.THEME_COLOR, 
+        mBubblesColor = prefs.getString(MessagingPreferenceActivity.BUBBLES_COLOR, 
                 Integer.toString(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE));
 
         listView.setRecyclerListener(new AbsListView.RecyclerListener() {
@@ -233,73 +231,34 @@ public class MessageListAdapter extends CursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         int boxType = getItemViewType(cursor);
         View view = mInflater.inflate((boxType == INCOMING_ITEM_TYPE_SMS ||
-                boxType == INCOMING_ITEM_TYPE_MMS) ?
-                    (mSpeechBubbles ? R.layout.message_list_item_recv_bubbles :
-                                      R.layout.message_list_item_recv ) :
-                    (mSpeechBubbles ? R.layout.message_list_item_send_bubbles :
-                                      R.layout.message_list_item_send ) ,
-                        parent, false);
+                boxType == INCOMING_ITEM_TYPE_MMS) ? R.layout.message_list_item_recv :
+                R.layout.message_list_item_send  ,parent, false);
         if (boxType == INCOMING_ITEM_TYPE_MMS || boxType == OUTGOING_ITEM_TYPE_MMS) {
             // We've got an mms item, pre-inflate the mms portion of the view
             view.findViewById(R.id.mms_layout_view_stub).setVisibility(View.VISIBLE);
         }
-        //mThemeColor
+        //mBubblesColor
         if ( boxType == INCOMING_ITEM_TYPE_SMS || boxType == INCOMING_ITEM_TYPE_MMS ) {
         	setThemeColorIncoming(view);
-        	/*
-            if ( mSpeechBubbles ) {
-                if (mThemeColor.equals("blue")) {
-                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_blue);
-                    view.findViewById(R.id.text_view).setLinkTextColor(0xffc00000);
-                } else if (mThemeColor.equals("green")) {
-                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_green);
-                    view.findViewById(R.id.text_view).setLinkTextColor(0xff40FFFF);
-                } else if (mThemeColor.equals("pink")) {
-                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_pink);
-                    view.findViewById(R.id.text_view).setLinkTextColor(0xff40FFFF);
-                }
-            } else {
-                if (mThemeColor.equals("blue")) {
-                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_blue);
-                    view.findViewById(R.id.text_view).setLinkTextColor(0xffc00000);
-                } else if (mThemeColor.equals("green")) {
-                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_green);
-                    view.findViewById(R.id.text_view).setLinkTextColor(0xff40FFFF);
-                } else if (mThemeColor.equals("pink")) {
-                    view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_pink);
-                    view.findViewById(R.id.text_view).setLinkTextColor(0xff40FFFF);
-                }
-            }
-            */
         }
 
         return view;
     }
 
     private void setThemeColorIncoming(View view) {
-    	TextView txt = (TextView)view.findViewById(R.id.text_view);
-        if ( mSpeechBubbles ) {
-            if (mThemeColor.equals("blue")) {
-                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_blue);
-                txt.setLinkTextColor(0xffc00000);
-            } else if (mThemeColor.equals("green")) {
-                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_green);
-                txt.setLinkTextColor(0xff0000c0);
-            } else if (mThemeColor.equals("pink")) {
-                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_pink);
-                txt.setLinkTextColor(0xff0000c0);
-            }
-        } else {
-            if (mThemeColor.equals("blue")) {
-                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_blue);
-                txt.setLinkTextColor(0xffc00000);
-            } else if (mThemeColor.equals("green")) {
-                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_green);
-                txt.setLinkTextColor(0xff0000c0);
-            } else if (mThemeColor.equals("pink")) {
-                view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.hairline_left_pink);
-                txt.setLinkTextColor(0xff0000c0);
-            }
+        TextView txt = (TextView)view.findViewById(R.id.text_view);
+        if (mBubblesColor.equals("gray")) {
+            view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_gray);
+            txt.setLinkTextColor(0xff0000c0);
+        } else if (mBubblesColor.equals("blue")) {
+            view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_blue);
+            txt.setLinkTextColor(0xffc00000);
+        } else if (mBubblesColor.equals("green")) {
+            view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_green);
+            txt.setLinkTextColor(0xff0000c0);
+        } else if (mBubblesColor.equals("pink")) {
+            view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_pink);
+            txt.setLinkTextColor(0xff0000c0);
         }
     }
 

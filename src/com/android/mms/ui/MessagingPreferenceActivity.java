@@ -73,7 +73,6 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String GROUP_MMS_MODE           = "pref_key_mms_group_mms";
 
     // Speech bubbles
-    public static final String SPEECH_BUBBLES           = "pref_key_speech_bubbles";
     public static final String HIDE_MESSAGE_AVATARS     = "pref_key_hide_message_avatars";
     public static final String HIDE_LIST_AVATARS          = "pref_key_hide_list_avatars";
 
@@ -167,7 +166,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // sure we notice if the user has changed the default SMS app.
     private boolean mIsSmsEnabled;
 
-    public static final String THEME_COLOR           = "pref_key_mms_theme";
+    public static final String BUBBLES_COLOR           = "pref_key_mms_color";
     private ListPreference mThemeColorPref;
     private CharSequence[] mThemeColorEntries;
     private CharSequence[] mThemeColorValues;
@@ -257,9 +256,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mMessageSendDelayPref = (ListPreference) findPreference(SEND_DELAY_DURATION);
         mMessageSendDelayPref.setSummary(mMessageSendDelayPref.getEntry());
 
-        mThemeColorPref = (ListPreference) findPreference(THEME_COLOR);
-        mThemeColorEntries = getResources().getTextArray(R.array.pref_mms_theme_entries);
-        mThemeColorValues = getResources().getTextArray(R.array.pref_mms_theme_values);
+        mThemeColorPref = (ListPreference) findPreference(BUBBLES_COLOR);
+        mThemeColorEntries = getResources().getTextArray(R.array.pref_mms_color_entries);
+        mThemeColorValues = getResources().getTextArray(R.array.pref_mms_color_values);
 
         setMessagePreferences();
     }
@@ -391,7 +390,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mInputTypePref.setOnPreferenceChangeListener(this);
 
         //
-        String themeType = sharedPreferences.getString(MessagingPreferenceActivity.THEME_COLOR,
+        String themeType = sharedPreferences.getString(MessagingPreferenceActivity.BUBBLES_COLOR,
                 Integer.toString(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE));
         mThemeColorPref.setValue(themeType);
         adjustThemeColorSummary(mThemeColorPref.getValue());
@@ -628,7 +627,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
                 return;
             }
         }
-        mThemeColorPref.setSummary(R.string.pref_mms_theme_blue);
+        mThemeColorPref.setSummary(R.string.pref_mms_color_gray);
     }
 
     // For the group mms feature to be enabled, the following must be true:
