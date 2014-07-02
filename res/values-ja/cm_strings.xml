@@ -225,4 +225,8 @@
 	<string name="pref_title_reset_convopt_to_default">設定初期化</string>
 	<string name="pref_summary_reset_convopt_to_default">個別の設定をアプリケーションの設定に戻します</string>
 
+    <string name="pref_back_image_title">背景画像</string>
+    <string name="pref_back_image_summary">背景画像を選択</string>
+
+
 </resources>

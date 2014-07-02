@@ -121,6 +121,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // Privacy mode
     public static final String PRIVACY_MODE_ENABLED = "pref_key_enable_privacy_mode";
 
+    // Heads up mode
+    public static final String HEADS_UP_MODE_ENABLED = "pref_key_enable_heads_up_mode";
+
     // Keyboard input type
     public static final String INPUT_TYPE                = "pref_key_mms_input_type";
 
@@ -160,6 +163,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private CheckBoxPreference mEnableNotificationsPref;
     private CheckBoxPreference mEnablePrivacyModePref;
     private CheckBoxPreference mMmsAutoRetrievialPref;
+    private CheckBoxPreference mEnableHeadsUpModePref;
     private RingtonePreference mRingtonePref;
     private Recycler mSmsRecycler;
     private Recycler mMmsRecycler;
@@ -230,6 +234,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mSmsPrefCategory.setEnabled(mIsSmsEnabled);
         mMmsPrefCategory.setEnabled(mIsSmsEnabled);
         mNotificationPrefCategory.setEnabled(mIsSmsEnabled);
+        mEnableHeadsUpModePref.setEnabled(mIsSmsEnabled);
     }
 
     private void loadPrefs() {
@@ -256,6 +261,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mEnableNotificationsPref = (CheckBoxPreference) findPreference(NOTIFICATION_ENABLED);
         mMmsAutoRetrievialPref = (CheckBoxPreference) findPreference(AUTO_RETRIEVAL);
         mEnablePrivacyModePref = (CheckBoxPreference) findPreference(PRIVACY_MODE_ENABLED);
+        mEnableHeadsUpModePref = (CheckBoxPreference) findPreference(HEADS_UP_MODE_ENABLED);
         mVibratePref = (CheckBoxPreference) findPreference(NOTIFICATION_VIBRATE);
         mRingtonePref = (RingtonePreference) findPreference(NOTIFICATION_RINGTONE);
 
@@ -553,6 +559,13 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mEnablePrivacyModePref.setChecked(isPrivacyModeEnabled);
     }
 
+    private void setEnabledHeadsUpModePref() {
+        // The "enable heads up mode" setting is really stored in our own prefs. Read the
+        // current value and set the checkbox to match.
+        boolean isHeadsUpModeEnabled = getHeadsUpModeEnabled(this);
+        mEnableHeadsUpModePref.setChecked(isHeadsUpModeEnabled);
+    }
+
     private void setSmsDisplayLimit() {
         mSmsLimitPref.setSummary(
                 getString(R.string.pref_summary_delete_limit,
@@ -623,6 +636,10 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         } else if (preference == mEnablePrivacyModePref) {
             // Update the actual "enable private mode" value that is stored in secure settings.
             enablePrivacyMode(mEnablePrivacyModePref.isChecked(), this);
+
+        } else if (preference == mEnableHeadsUpModePref) {
+            // Update the actual "enable heads up mode" value that is stored in secure settings.
+            enableHeadsUpMode(mEnableHeadsUpModePref.isChecked(), this);
 
         } else if (preference == mMmsAutoRetrievialPref) {
             if (mMmsAutoRetrievialPref.isChecked()) {
@@ -710,6 +727,21 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         SharedPreferences.Editor editor =
             PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putBoolean(MessagingPreferenceActivity.PRIVACY_MODE_ENABLED, enabled);
+        editor.apply();
+    }
+
+    public static boolean getHeadsUpModeEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean headsUpModeEnabled =
+            prefs.getBoolean(MessagingPreferenceActivity.HEADS_UP_MODE_ENABLED, true);
+        return headsUpModeEnabled;
+    }
+
+    public static void enableHeadsUpMode(boolean enabled, Context context) {
+        // Store the value of heads up mode in SharedPreferences
+        SharedPreferences.Editor editor =
+            PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean(MessagingPreferenceActivity.HEADS_UP_MODE_ENABLED, enabled);
         editor.apply();
     }
 
