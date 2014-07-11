@@ -38,7 +38,11 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SqliteWrapper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -83,6 +87,9 @@ import com.android.mms.util.Recycler;
 import com.android.mms.widget.MmsWidgetProvider;
 import com.google.android.mms.pdu.PduHeaders;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -173,6 +180,21 @@ public class ConversationList extends ListActivity implements DraftCache.OnDraft
         } else {
             mSavedFirstVisiblePosition = AdapterView.INVALID_POSITION;
             mSavedFirstItemOffset = 0;
+        }
+        
+        String mBgImage = mPrefs.getString(MessagingPreferenceActivity.BG_IMAGE, "");
+        if ( mBgImage.length() > 0 ) {
+			try {
+				InputStream in = getContentResolver().openInputStream(Uri.parse(mBgImage));
+				Bitmap bitmapimg = BitmapFactory.decodeStream(in);
+				in.close();
+				Drawable drawable = new BitmapDrawable(getResources(), bitmapimg);
+				listView.setBackgroundDrawable(drawable);
+			} catch (FileNotFoundException e) {
+				Log.d("MMS", e.toString());
+			} catch (IOException e) {
+				Log.d("MMS", e.toString());
+			}
         }
     }
 

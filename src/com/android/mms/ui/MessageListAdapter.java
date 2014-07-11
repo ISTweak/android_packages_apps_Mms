@@ -22,6 +22,12 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
@@ -44,6 +50,10 @@ import android.text.InputType;
 
 import com.android.mms.R;
 import com.google.android.mms.MmsException;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * The back-end data adapter of a message list.
@@ -129,6 +139,7 @@ public class MessageListAdapter extends CursorAdapter {
     private boolean mFullTimestamp;
     private boolean mSentTimestamp;
     private String mBubblesColor;
+	private String mBgImage;
 
     public MessageListAdapter(
             Context context, Cursor c, ListView listView,
@@ -150,9 +161,21 @@ public class MessageListAdapter extends CursorAdapter {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         mFullTimestamp = prefs.getBoolean(MessagingPreferenceActivity.FULL_TIMESTAMP, false);
         mSentTimestamp = prefs.getBoolean(MessagingPreferenceActivity.SENT_TIMESTAMP, false);
-        mBubblesColor = prefs.getString(MessagingPreferenceActivity.BUBBLES_COLOR, 
-                Integer.toString(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE));
-
+        mBubblesColor = prefs.getString(MessagingPreferenceActivity.BUBBLES_COLOR, "blue");
+		mBgImage = prefs.getString(MessagingPreferenceActivity.BG_IMAGE, "");
+        if ( mBgImage.length() > 0 ) {
+			try {
+				InputStream in = context.getContentResolver().openInputStream(Uri.parse(mBgImage));
+				Bitmap bitmapimg = BitmapFactory.decodeStream(in);
+				in.close();
+				Drawable drawable = new BitmapDrawable(context.getResources(), bitmapimg);
+				listView.setBackground(drawable);
+			} catch (FileNotFoundException e) {
+				Log.d("MMS", e.toString());
+			} catch (IOException e) {
+				Log.d("MMS", e.toString());
+			}
+        }
         listView.setRecyclerListener(new AbsListView.RecyclerListener() {
             @Override
             public void onMovedToScrapHeap(View view) {
@@ -262,7 +285,7 @@ public class MessageListAdapter extends CursorAdapter {
         }
     }
 
-    public MessageItem getCachedMessageItem(String type, long msgId, Cursor c) {
+	public MessageItem getCachedMessageItem(String type, long msgId, Cursor c) {
         MessageItem item = mMessageItemCache.get(getKey(type, msgId));
         if (item == null && c != null && isCursorValid(c)) {
             try {

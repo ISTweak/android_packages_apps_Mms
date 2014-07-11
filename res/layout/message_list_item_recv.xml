@@ -129,7 +129,7 @@
                 android:paddingLeft="16dip"
                 android:paddingBottom="8dip"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#66333333" />
+                android:textColor="#ff333333" />
             </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
