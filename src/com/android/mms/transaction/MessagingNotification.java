@@ -1025,7 +1025,7 @@ public class MessagingNotification {
             qmIntent.putExtra(QuickMessagePopup.SMS_NOTIFICATION_OBJECT_EXTRA, mostRecentNotification);
         }
 
-        if (isHeadsUp && (!qmPopupEnabled || qmPopupEnabled && qmIntent == null)) {
+        if (isHeadsUp && qmIntent == null) {
             Bundle extras = new Bundle();
             // Request a heads up notification.
             extras.putInt(Notification.EXTRA_AS_HEADS_UP,
