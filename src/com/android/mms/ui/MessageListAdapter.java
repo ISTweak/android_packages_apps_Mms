@@ -139,7 +139,7 @@ public class MessageListAdapter extends CursorAdapter {
     private boolean mFullTimestamp;
     private boolean mSentTimestamp;
     private String mBubblesColor;
-	private String mBgImage;
+    private String mBgImage;
 
     public MessageListAdapter(
             Context context, Cursor c, ListView listView,
@@ -162,19 +162,19 @@ public class MessageListAdapter extends CursorAdapter {
         mFullTimestamp = prefs.getBoolean(MessagingPreferenceActivity.FULL_TIMESTAMP, false);
         mSentTimestamp = prefs.getBoolean(MessagingPreferenceActivity.SENT_TIMESTAMP, false);
         mBubblesColor = prefs.getString(MessagingPreferenceActivity.BUBBLES_COLOR, "blue");
-		mBgImage = prefs.getString(MessagingPreferenceActivity.BG_IMAGE, "");
+        mBgImage = prefs.getString(MessagingPreferenceActivity.BG_IMAGE, "");
         if ( mBgImage.length() > 0 ) {
-			try {
-				InputStream in = context.getContentResolver().openInputStream(Uri.parse(mBgImage));
-				Bitmap bitmapimg = BitmapFactory.decodeStream(in);
-				in.close();
-				Drawable drawable = new BitmapDrawable(context.getResources(), bitmapimg);
-				listView.setBackground(drawable);
-			} catch (FileNotFoundException e) {
-				Log.d("MMS", e.toString());
-			} catch (IOException e) {
-				Log.d("MMS", e.toString());
-			}
+            try {
+                InputStream in = context.openFileInput(mBgImage);
+                Bitmap bitmapimg = BitmapFactory.decodeStream(in);
+                in.close();
+                Drawable drawable = new BitmapDrawable(context.getResources(), bitmapimg);
+                listView.setBackground(drawable);
+            } catch (FileNotFoundException e) {
+                Log.e("MMS", e.toString());
+            } catch (IOException e) {
+                Log.e("MMS", e.toString());
+            }
         }
         listView.setRecyclerListener(new AbsListView.RecyclerListener() {
             @Override
@@ -262,7 +262,7 @@ public class MessageListAdapter extends CursorAdapter {
         }
         //mBubblesColor
         if ( boxType == INCOMING_ITEM_TYPE_SMS || boxType == INCOMING_ITEM_TYPE_MMS ) {
-        	setThemeColorIncoming(view);
+            setThemeColorIncoming(view);
         }
 
         return view;
@@ -285,7 +285,7 @@ public class MessageListAdapter extends CursorAdapter {
         }
     }
 
-	public MessageItem getCachedMessageItem(String type, long msgId, Cursor c) {
+    public MessageItem getCachedMessageItem(String type, long msgId, Cursor c) {
         MessageItem item = mMessageItemCache.get(getKey(type, msgId));
         if (item == null && c != null && isCursorValid(c)) {
             try {

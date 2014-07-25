@@ -26,6 +26,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -44,8 +47,10 @@ import android.provider.SearchRecentSuggestions;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import com.android.mms.MmsApp;
 import com.android.mms.MmsConfig;
@@ -53,6 +58,12 @@ import com.android.mms.R;
 import com.android.mms.templates.TemplatesListActivity;
 import com.android.mms.transaction.TransactionService;
 import com.android.mms.util.Recycler;
+
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 
 /**
  * With this activity, users can set preferences for MMS and SMS and
@@ -117,7 +128,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String USER_AGENT               = "pref_key_mms_user_agent";
     public static final String USER_AGENT_CUSTOM        = "pref_key_mms_user_agent_custom";
 
-	// Unicode
+    // Unicode
     public static final String STRIP_UNICODE             = "pref_key_strip_unicode";
 
     // Menu entries
@@ -271,36 +282,84 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
         setMessagePreferences();
     }
-	private void requestPickImage() {
+    private void requestPickImage() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         String type = String.format("%s/*", "image");
         intent.setType(type);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, REQUEST_PICK_IMAGE);
-	}
-	
-	@Override
+    }
+    
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         
         switch (requestCode) {
-        	case REQUEST_PICK_IMAGE:
-        		String imageUri = "";
-        		if (resultCode == -1) {
-        			imageUri = data.getDataString();
-        		}
+            case REQUEST_PICK_IMAGE:
+                String imageUri = "";
+                String prefStr = "";
+                if (resultCode == -1) {
+                    imageUri = data.getDataString();
+                }
+                if ( imageUri != "" ) {
+                    if ( saveBgImage(imageUri) ) {
+                        prefStr = "bg.png";
+                    }
+                }
                 PreferenceManager manager = getPreferenceManager();
                 SharedPreferences prefs = manager.getSharedPreferences();
                 Editor editor = prefs.edit();
-                editor.putString(MessagingPreferenceActivity.BG_IMAGE, imageUri);
+                editor.putString(MessagingPreferenceActivity.BG_IMAGE, prefStr);
                 editor.apply();
-                if ( imageUri != "" ) {
-                	imagePreference.setSummary(imageUri);
+                if ( prefStr != "" ) {
+                    imagePreference.setSummary("");
+                    InputStream input;
+                    try {
+                        input = this.openFileInput("bg.png");
+                        imagePreference.setIcon(new BitmapDrawable(getResources(), BitmapFactory.decodeStream(input)));
+                        input.close();
+                    } catch (FileNotFoundException e) {
+                        Log.e("MMS", e.toString());
+                    } catch (IOException e) {
+                        Log.e("MMS", e.toString());
+                    }  
                 } else {
-                	imagePreference.setSummary(R.string.pref_back_image_summary);
+                    this.deleteFile("bg.png");
+                    imagePreference.setSummary(R.string.pref_back_image_summary);
+                    imagePreference.setIcon(android.R.drawable.ic_menu_add);
                 }
-        		Log.d("MMS IMAGE", imageUri);
-        		break;
+                Log.d("MMS IMAGE", imageUri);
+                break;
         }
+    }
+    
+    private boolean saveBgImage(String imageUri) {
+        boolean ret = true;
+        WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
+        Display disp = wm.getDefaultDisplay();
+        int width = disp.getWidth();
+        int height = disp.getHeight();
+        InputStream in = null;
+        FileOutputStream out;
+        try {
+            in = getContentResolver().openInputStream(Uri.parse(imageUri));
+            Bitmap bitmapimg = BitmapFactory.decodeStream(in);
+            in.close();
+            
+            Bitmap bitmapimg2 = Bitmap.createScaledBitmap(bitmapimg, width, height, false);
+            
+            out = this.openFileOutput("bg.png", Context.MODE_PRIVATE);
+            bitmapimg2.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.close();
+            
+        } catch (FileNotFoundException e) {
+            Log.e("MMS", e.toString());
+            ret = false;
+        } catch (IOException e) {
+            Log.e("MMS", e.toString());
+            ret = false;
+        }
+        return ret;
     }
 
     private void restoreDefaultPreferences() {
@@ -436,18 +495,34 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mThemeColorPref.setOnPreferenceChangeListener(this);
         
         String bgImage = sharedPreferences.getString(MessagingPreferenceActivity.BG_IMAGE, "");
-        imagePreference.setSummary(bgImage.length()>0 ? bgImage : this.getString(R.string.pref_back_image_summary));
+        if ( bgImage != "" ) {
+            imagePreference.setSummary("");
+            InputStream input;
+            try {
+                input = this.openFileInput("bg.png");
+                imagePreference.setIcon(new BitmapDrawable(getResources(), BitmapFactory.decodeStream(input)));
+                input.close();
+            } catch (FileNotFoundException e) {
+                Log.e("MMS", e.toString());
+            } catch (IOException e) {
+                Log.e("MMS", e.toString());
+            }  
+        } else {
+            this.deleteFile("bg.png");
+            imagePreference.setSummary(R.string.pref_back_image_summary);
+            imagePreference.setIcon(android.R.drawable.ic_menu_add);
+        }
         imagePreference.setOnPreferenceChangeListener(this);
         imagePreference.setOnPreferenceClickListener(
             new OnPreferenceClickListener() {
-			public boolean onPreferenceClick(Preference preference) {
-				try {
-					requestPickImage();
-				} catch (ActivityNotFoundException e) {
-				}
-				return true;
-			}
-        	
+            public boolean onPreferenceClick(Preference preference) {
+                try {
+                    requestPickImage();
+                } catch (ActivityNotFoundException e) {
+                }
+                return true;
+            }
+            
         });
 
         mMessageSendDelayPref.setOnPreferenceChangeListener(this);

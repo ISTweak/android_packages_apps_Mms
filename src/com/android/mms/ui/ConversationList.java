@@ -184,17 +184,17 @@ public class ConversationList extends ListActivity implements DraftCache.OnDraft
         
         String mBgImage = mPrefs.getString(MessagingPreferenceActivity.BG_IMAGE, "");
         if ( mBgImage.length() > 0 ) {
-			try {
-				InputStream in = getContentResolver().openInputStream(Uri.parse(mBgImage));
-				Bitmap bitmapimg = BitmapFactory.decodeStream(in);
-				in.close();
-				Drawable drawable = new BitmapDrawable(getResources(), bitmapimg);
-				listView.setBackgroundDrawable(drawable);
-			} catch (FileNotFoundException e) {
-				Log.d("MMS", e.toString());
-			} catch (IOException e) {
-				Log.d("MMS", e.toString());
-			}
+            try {
+                InputStream in = this.openFileInput(mBgImage);
+                Bitmap bitmapimg = BitmapFactory.decodeStream(in);
+                in.close();
+                Drawable drawable = new BitmapDrawable(getResources(), bitmapimg);
+                listView.setBackground(drawable);
+            } catch (FileNotFoundException e) {
+                Log.d("MMS", e.toString());
+            } catch (IOException e) {
+                Log.d("MMS", e.toString());
+            }
         }
     }
 
