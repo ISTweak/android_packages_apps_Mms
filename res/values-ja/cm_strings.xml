@@ -162,6 +162,11 @@
     <string name="alert_dialog_yes">はい</string>
     <string name="alert_dialog_no">いいえ</string>
 
+    <!-- Context menu item on a message for marking as unread -->
+    <string name="menu_as_unread">未読にする</string>
+    <!-- Context menu item on a message for marking all threads as unread -->
+    <string name="menu_all_as_unread">全て未読にする</string>
+
     <!-- Multi recipients -->
     <string name="select_recipients">宛先選択</string>
     <string name="groups_header">グループ</string>
