@@ -84,6 +84,10 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String MSG_SIGNATURE            = "pref_msg_signature";
     public static final String MMS_BREATH               = "mms_breath";
 
+    // Speech bubbles
+    public static final String HIDE_MESSAGE_AVATARS     = "pref_key_hide_message_avatars";
+    public static final String HIDE_LIST_AVATARS          = "pref_key_hide_list_avatars";
+
     // Emoji
     public static final String ENABLE_EMOJIS             = "pref_key_enable_emojis";
     public static final String ENABLE_QUICK_EMOJIS       = "pref_key_enable_quick_emojis";
@@ -208,6 +212,15 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // Whether or not we are currently enabled for SMS. This field is updated in onResume to make
     // sure we notice if the user has changed the default SMS app.
     private boolean mIsSmsEnabled;
+
+    public static final String BUBBLES_COLOR           = "pref_key_mms_color";
+    private ListPreference mThemeColorPref;
+    private CharSequence[] mThemeColorEntries;
+    private CharSequence[] mThemeColorValues;
+    
+    public static final String BG_IMAGE           = "pref_back_image";
+    private static final int REQUEST_PICK_IMAGE = 88946;
+    private Preference imagePreference = null;
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -381,7 +394,93 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mInputTypeEntries = getResources().getTextArray(R.array.pref_entries_input_type);
         mInputTypeValues = getResources().getTextArray(R.array.pref_values_input_type);
 
+        mThemeColorPref = (ListPreference) findPreference(BUBBLES_COLOR);
+        mThemeColorEntries = getResources().getTextArray(R.array.pref_mms_color_entries);
+        mThemeColorValues = getResources().getTextArray(R.array.pref_mms_color_values);
+        
+        imagePreference = (Preference) findPreference(BG_IMAGE);
+
         setMessagePreferences();
+    }
+
+    private void requestPickImage() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        String type = String.format("%s/*", "image");
+        intent.setType(type);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(intent, REQUEST_PICK_IMAGE);
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        switch (requestCode) {
+            case REQUEST_PICK_IMAGE:
+                String imageUri = "";
+                String prefStr = "";
+                if (resultCode == -1) {
+                    imageUri = data.getDataString();
+                }
+                if ( imageUri != "" ) {
+                    if ( saveBgImage(imageUri) ) {
+                        prefStr = "bg.png";
+                    }
+                }
+                PreferenceManager manager = getPreferenceManager();
+                SharedPreferences prefs = manager.getSharedPreferences();
+                Editor editor = prefs.edit();
+                editor.putString(MessagingPreferenceActivity.BG_IMAGE, prefStr);
+                editor.apply();
+                if ( prefStr != "" ) {
+                    imagePreference.setSummary("");
+                    InputStream input;
+                    try {
+                        input = this.openFileInput("bg.png");
+                        imagePreference.setIcon(new BitmapDrawable(getResources(), BitmapFactory.decodeStream(input)));
+                        input.close();
+                    } catch (FileNotFoundException e) {
+                        Log.e("MMS", e.toString());
+                    } catch (IOException e) {
+                        Log.e("MMS", e.toString());
+                    }  
+                } else {
+                    this.deleteFile("bg.png");
+                    imagePreference.setSummary(R.string.pref_back_image_summary);
+                    imagePreference.setIcon(android.R.drawable.ic_menu_add);
+                }
+                Log.d("MMS IMAGE", imageUri);
+                break;
+        }
+    }
+    
+    private boolean saveBgImage(String imageUri) {
+        boolean ret = true;
+        WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
+        Display disp = wm.getDefaultDisplay();
+        int width = disp.getWidth();
+        int height = disp.getHeight();
+        InputStream in = null;
+        FileOutputStream out;
+        try {
+            in = getContentResolver().openInputStream(Uri.parse(imageUri));
+            Bitmap bitmapimg = BitmapFactory.decodeStream(in);
+            in.close();
+            
+            Bitmap bitmapimg2 = Bitmap.createScaledBitmap(bitmapimg, width, height, false);
+            
+            out = this.openFileOutput("bg.png", Context.MODE_PRIVATE);
+            bitmapimg2.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.close();
+            
+        } catch (FileNotFoundException e) {
+            Log.e("MMS", e.toString());
+            ret = false;
+        } catch (IOException e) {
+            Log.e("MMS", e.toString());
+            ret = false;
+        }
+        return ret;
     }
 
     private void restoreDefaultPreferences() {
@@ -517,6 +616,45 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mInputTypePref.setValue(inputType);
         adjustInputTypeSummary(mInputTypePref.getValue());
         mInputTypePref.setOnPreferenceChangeListener(this);
+
+        //
+        String themeType = sharedPreferences.getString(MessagingPreferenceActivity.BUBBLES_COLOR, "blue");
+        mThemeColorPref.setValue(themeType);
+        adjustThemeColorSummary(mThemeColorPref.getValue());
+        mThemeColorPref.setOnPreferenceChangeListener(this);
+        
+        String bgImage = sharedPreferences.getString(MessagingPreferenceActivity.BG_IMAGE, "");
+        if ( bgImage != "" ) {
+            imagePreference.setSummary("");
+            InputStream input;
+            try {
+                input = this.openFileInput("bg.png");
+                imagePreference.setIcon(new BitmapDrawable(getResources(), BitmapFactory.decodeStream(input)));
+                input.close();
+            } catch (FileNotFoundException e) {
+                Log.e("MMS", e.toString());
+            } catch (IOException e) {
+                Log.e("MMS", e.toString());
+            }  
+        } else {
+            this.deleteFile("bg.png");
+            imagePreference.setSummary(R.string.pref_back_image_summary);
+            imagePreference.setIcon(android.R.drawable.ic_menu_add);
+        }
+        imagePreference.setOnPreferenceChangeListener(this);
+        imagePreference.setOnPreferenceClickListener(
+            new OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                try {
+                    requestPickImage();
+                } catch (ActivityNotFoundException e) {
+                }
+                return true;
+            }
+            
+        });
+
+        mMessageSendDelayPref.setOnPreferenceChangeListener(this);
     }
 
     private void setRingtoneSummary(String soundValue) {
@@ -905,11 +1043,15 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         } else if (preference == mInputTypePref) {
             adjustInputTypeSummary((String)newValue);
             result = true;
+        } else if (preference == mThemeColorPref) {
+            adjustThemeColorSummary((String)newValue);
+            result = true;
         } else if (preference == mSignature) {
             SharedPreferences.Editor editor = sp.edit();
             editor.putString(MSG_SIGNATURE, (String) newValue);
             editor.commit();
             mSignature.setText(sp.getString(MSG_SIGNATURE, ""));
+
         }
         return result;
     }
@@ -923,6 +1065,17 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             }
         }
         mInputTypePref.setSummary(R.string.pref_keyboard_unknown);
+    }
+
+    private void adjustThemeColorSummary(String value) {
+        int len = mThemeColorValues.length;
+        for (int i = 0; i < len; i++) {
+            if (mThemeColorValues[i].equals(value)) {
+                mThemeColorPref.setSummary(mThemeColorEntries[i]);
+                return;
+            }
+        }
+        mThemeColorPref.setSummary(R.string.pref_mms_color_gray);
     }
 
     // For the group mms feature to be enabled, the following must be true:
