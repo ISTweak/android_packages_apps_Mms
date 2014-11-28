@@ -130,4 +130,17 @@
         <item>2</item>
     </string-array>
 
+	<string-array name="pref_mms_color_entries" translatable="false">
+	    <item>@string/pref_mms_color_gray</item>
+        <item>@string/pref_mms_color_blue</item>
+        <item>@string/pref_mms_color_green</item>
+        <item>@string/pref_mms_color_pink</item>
+    </string-array>
+    
+    <string-array name="pref_mms_color_values" translatable="false">
+	    <item>gray</item>
+        <item>blue</item>
+        <item>green</item>
+        <item>pink</item>
+    </string-array>
 </resources>

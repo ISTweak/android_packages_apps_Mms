@@ -21,12 +21,17 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -46,8 +51,11 @@ import android.preference.RingtonePreference;
 import android.provider.SearchRecentSuggestions;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -59,6 +67,12 @@ import com.android.mms.preferences.UserAgentListPreference;
 import com.android.mms.templates.TemplatesListActivity;
 import com.android.mms.transaction.TransactionService;
 import com.android.mms.util.Recycler;
+
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 
 /**
  * With this activity, users can set preferences for MMS and SMS and
@@ -301,6 +315,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mGestureSensitivity.setEnabled(mIsSmsEnabled);
         mUnicodeStripping.setEnabled(mIsSmsEnabled);
         mInputTypePref.setEnabled(mIsSmsEnabled);
+		mThemeColorPref.setEnabled(mIsSmsEnabled);
         mEnableQuickMessagePref.setEnabled(mIsSmsEnabled);
         mEnableQmLockscreenPref.setEnabled(mIsSmsEnabled);
         mEnableQmCloseAllPref.setEnabled(mIsSmsEnabled);
@@ -619,6 +634,8 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
         //
         String themeType = sharedPreferences.getString(MessagingPreferenceActivity.BUBBLES_COLOR, "blue");
+Log.d("MMS", "--------------------------------------");		
+Log.d("MMS", themeType);
         mThemeColorPref.setValue(themeType);
         adjustThemeColorSummary(mThemeColorPref.getValue());
         mThemeColorPref.setOnPreferenceChangeListener(this);
@@ -654,7 +671,6 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             
         });
 
-        mMessageSendDelayPref.setOnPreferenceChangeListener(this);
     }
 
     private void setRingtoneSummary(String soundValue) {

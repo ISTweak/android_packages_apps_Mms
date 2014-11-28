@@ -349,6 +349,31 @@
             android:entryValues="@array/pref_mms_user_agent_values"
             android:dialogTitle="@string/pref_title_mms_user_agent" />
 
+        <ListPreference
+            android:key="pref_key_mms_color"
+            android:persistent="true"
+            android:dialogTitle="@string/pref_mms_color"
+            android:title="@string/pref_mms_color"
+            android:entries="@array/pref_mms_color_entries"
+            android:entryValues="@array/pref_mms_color_values"
+            android:defaultValue="blue"/>
+
+        <PreferenceScreen
+            android:key="pref_back_image"
+            android:title="@string/pref_back_image_title"
+            android:summary="@string/pref_back_image_summary" />
+
+        <CheckBoxPreference
+            android:key="pref_key_hide_message_avatars"
+            android:title="@string/pref_title_hide_message_avatars"
+            android:summary="@string/pref_summary_hide_message_avatars"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="pref_key_hide_list_avatars"
+            android:title="@string/pref_title_hide_list_avatars"
+            android:summary="@string/pref_summary_hide_list_avatars"
+            android:defaultValue="false" />
+
   </PreferenceCategory>
 
 </PreferenceScreen>
