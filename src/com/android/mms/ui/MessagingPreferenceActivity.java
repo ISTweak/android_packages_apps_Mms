@@ -100,7 +100,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
     // Speech bubbles
     public static final String HIDE_MESSAGE_AVATARS     = "pref_key_hide_message_avatars";
-    public static final String HIDE_LIST_AVATARS          = "pref_key_hide_list_avatars";
+	public static final String HIDE_AVATAR              = "pref_hide_avatar";
 
     // Emoji
     public static final String ENABLE_EMOJIS             = "pref_key_enable_emojis";
@@ -148,7 +148,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
     private static final String DIRECT_CALL_PREF         = "direct_call_pref";
     public static final String MESSAGE_FONT_SIZE         = "pref_key_mms_message_font_size";
-    private static final String HIDE_AVATAR              = "pref_hide_avatar";
+    
 
     // Text Area
     private static final String PREF_TEXT_AREA_SIZE      = "pref_text_area_size";
@@ -634,8 +634,6 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
         //
         String themeType = sharedPreferences.getString(MessagingPreferenceActivity.BUBBLES_COLOR, "blue");
-Log.d("MMS", "--------------------------------------");		
-Log.d("MMS", themeType);
         mThemeColorPref.setValue(themeType);
         adjustThemeColorSummary(mThemeColorPref.getValue());
         mThemeColorPref.setOnPreferenceChangeListener(this);

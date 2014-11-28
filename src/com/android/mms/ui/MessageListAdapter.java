@@ -22,6 +22,12 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
@@ -39,10 +45,16 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.text.InputType;
 
 import com.android.mms.LogTag;
 import com.android.mms.R;
 import com.google.android.mms.MmsException;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * The back-end data adapter of a message list.
@@ -127,6 +139,8 @@ public class MessageListAdapter extends CursorAdapter {
     private boolean mIsGroupConversation;
     private boolean mFullTimestamp;
     private boolean mSentTimestamp;
+    private String mBubblesColor;
+    private String mBgImage;
 
     public MessageListAdapter(
             Context context, Cursor c, ListView listView,
@@ -148,6 +162,21 @@ public class MessageListAdapter extends CursorAdapter {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         mFullTimestamp = prefs.getBoolean(MessagingPreferenceActivity.FULL_TIMESTAMP, false);
         mSentTimestamp = prefs.getBoolean(MessagingPreferenceActivity.SENT_TIMESTAMP, false);
+        mBubblesColor = prefs.getString(MessagingPreferenceActivity.BUBBLES_COLOR, "blue");
+        mBgImage = prefs.getString(MessagingPreferenceActivity.BG_IMAGE, "");
+        if ( mBgImage.length() > 0 ) {
+            try {
+                InputStream in = context.openFileInput(mBgImage);
+                Bitmap bitmapimg = BitmapFactory.decodeStream(in);
+                in.close();
+                Drawable drawable = new BitmapDrawable(context.getResources(), bitmapimg);
+                listView.setBackground(drawable);
+            } catch (FileNotFoundException e) {
+                Log.e("MMS", e.toString());
+            } catch (IOException e) {
+                Log.e("MMS", e.toString());
+            }
+        }
 
         listView.setRecyclerListener(new AbsListView.RecyclerListener() {
             @Override
@@ -234,7 +263,29 @@ public class MessageListAdapter extends CursorAdapter {
             // We've got an mms item, pre-inflate the mms portion of the view
             view.findViewById(R.id.mms_layout_view_stub).setVisibility(View.VISIBLE);
         }
+        //mBubblesColor
+        if ( boxType == INCOMING_ITEM_TYPE_SMS || boxType == INCOMING_ITEM_TYPE_MMS ) {
+            setThemeColorIncoming(view);
+        }
+
         return view;
+    }
+
+    private void setThemeColorIncoming(View view) {
+        TextView txt = (TextView)view.findViewById(R.id.text_view);
+        if (mBubblesColor.equals("gray")) {
+            view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_gray);
+            txt.setLinkTextColor(0xff0000c0);
+        } else if (mBubblesColor.equals("blue")) {
+            view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_blue);
+            txt.setLinkTextColor(0xffc00000);
+        } else if (mBubblesColor.equals("green")) {
+            view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_green);
+            txt.setLinkTextColor(0xff0000c0);
+        } else if (mBubblesColor.equals("pink")) {
+            view.findViewById(R.id.message_block).setBackgroundResource(R.drawable.bubble_left_pink);
+            txt.setLinkTextColor(0xff0000c0);
+        }
     }
 
     public MessageItem getCachedMessageItem(String type, long msgId, Cursor c) {

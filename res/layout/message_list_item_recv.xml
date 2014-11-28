@@ -21,6 +21,7 @@
 <com.android.mms.ui.MessageListItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/msg_list_item_recv"
+    android:background="@color/bubbles_bgcolor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
@@ -28,6 +29,7 @@
     <LinearLayout android:id="@+id/mms_layout_view_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+		android:layout_marginBottom="8dip"
         android:layout_weight="1"
         android:orientation="vertical" >
 
@@ -43,6 +45,12 @@
                 android:layout_width="@dimen/avatar_width_height"
                 android:layout_height="@dimen/avatar_width_height" />
 
+            <Space
+                android:id="@+id/message_space"
+                android:layout_width="@dimen/avatar_width_height"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"/>
+
             <LinearLayout
                 android:id="@+id/message_block"
                 android:minHeight="@dimen/avatar_width_height"
@@ -50,10 +58,11 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/avatar"
                 android:layout_alignParentRight="false"
-                android:background="@drawable/hairline_left"
+                android:background="@drawable/bubble_left_blue"
                 android:orientation="vertical" >
 
-                <TextView android:id="@+id/text_view"
+                <TextView
+					android:id="@+id/text_view"
                     android:autoLink="all"
                     android:paddingLeft="@dimen/message_item_text_padding_left_right"
                     android:paddingRight="@dimen/message_item_text_padding_left_right"

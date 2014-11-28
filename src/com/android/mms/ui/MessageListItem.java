@@ -107,6 +107,7 @@ public class MessageListItem extends LinearLayout implements
     private TextView mDateView;
     public View mMessageBlock;
     private QuickContactDivot mAvatar;
+    private View mMessageSpace;
     static private Drawable sDefaultContactImage;
     private Presenter mPresenter;
     private int mPosition;      // for debugging
@@ -145,6 +146,7 @@ public class MessageListItem extends LinearLayout implements
         mDeliveredIndicator = (ImageView) findViewById(R.id.delivered_indicator);
         mDetailsIndicator = (ImageView) findViewById(R.id.details_indicator);
         mAvatar = (QuickContactDivot) findViewById(R.id.avatar);
+        mMessageSpace = (View) findViewById(R.id.message_space);
         mMessageBlock = findViewById(R.id.message_block);
     }
 
@@ -285,29 +287,38 @@ public class MessageListItem extends LinearLayout implements
     }
 
     private void updateAvatarView(String addr, boolean isSelf) {
-        Drawable defaultContactImage =
-                mContext.getResources().getDrawable(R.drawable.ic_contact_picture);
-        if (!sDefaultContactImage.getConstantState().equals(defaultContactImage)) {
-            sDefaultContactImage = defaultContactImage;
-        }
-        Drawable avatarDrawable;
-        if (isSelf || !TextUtils.isEmpty(addr)) {
-            Contact contact = isSelf ? Contact.getMe(false) : Contact.get(addr, false);
-            avatarDrawable = contact.getAvatar(mContext, sDefaultContactImage);
-
-            if (isSelf) {
-                mAvatar.assignContactUri(Profile.CONTENT_URI);
-            } else {
-                if (contact.existsInDatabase()) {
-                    mAvatar.assignContactUri(contact.getUri());
-                } else {
-                    mAvatar.assignContactFromPhone(contact.getNumber(), true);
-                }
-            }
-        } else {
-            avatarDrawable = sDefaultContactImage;
-        }
-        mAvatar.setImageDrawable(avatarDrawable);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		boolean mHideAvatars = prefs.getBoolean(MessagingPreferenceActivity.HIDE_MESSAGE_AVATARS, false);
+		if (mHideAvatars) {
+			mAvatar.setVisibility(View.GONE);
+			mMessageSpace.setVisibility(View.VISIBLE);
+		} else {
+	        Drawable defaultContactImage =
+	                mContext.getResources().getDrawable(R.drawable.ic_contact_picture);
+	        if (!sDefaultContactImage.getConstantState().equals(defaultContactImage)) {
+	            sDefaultContactImage = defaultContactImage;
+	        }
+	        Drawable avatarDrawable;
+	        if (isSelf || !TextUtils.isEmpty(addr)) {
+	            Contact contact = isSelf ? Contact.getMe(false) : Contact.get(addr, false);
+	            avatarDrawable = contact.getAvatar(mContext, sDefaultContactImage);
+	
+	            if (isSelf) {
+	                mAvatar.assignContactUri(Profile.CONTENT_URI);
+	            } else {
+	                if (contact.existsInDatabase()) {
+	                    mAvatar.assignContactUri(contact.getUri());
+	                } else {
+	                    mAvatar.assignContactFromPhone(contact.getNumber(), true);
+	                }
+	            }
+	        } else {
+	            avatarDrawable = sDefaultContactImage;
+	        }
+	        mAvatar.setImageDrawable(avatarDrawable);
+			mAvatar.setVisibility(View.VISIBLE);
+			mMessageSpace.setVisibility(View.INVISIBLE);
+		}
     }
 
     private void bindCommonMessage(final boolean sameItem) {

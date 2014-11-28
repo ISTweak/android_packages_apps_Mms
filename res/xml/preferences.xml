@@ -304,12 +304,6 @@
             android:title="@string/direct_call_title"
             android:summary="@string/direct_call_summary"/>
 
-        <CheckBoxPreference
-            android:key="pref_hide_avatar"
-            android:title="@string/hide_avatar"
-            android:summary="@string/hide_avatar_summary"
-            android:defaultValue="false" />
-
         <ListPreference
             android:key="pref_key_mms_message_font_size"
             android:defaultValue="18"
@@ -369,10 +363,11 @@
             android:summary="@string/pref_summary_hide_message_avatars"
             android:defaultValue="false" />
         <CheckBoxPreference
-            android:key="pref_key_hide_list_avatars"
-            android:title="@string/pref_title_hide_list_avatars"
-            android:summary="@string/pref_summary_hide_list_avatars"
+            android:key="pref_hide_avatar"
+            android:title="@string/hide_avatar"
+            android:summary="@string/hide_avatar_summary"
             android:defaultValue="false" />
+
 
   </PreferenceCategory>
 

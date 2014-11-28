@@ -21,6 +21,7 @@
 <com.android.mms.ui.MessageListItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/msg_list_item_send"
+    android:background="@color/bubbles_bgcolor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
@@ -28,12 +29,14 @@
     <LinearLayout android:id="@+id/mms_layout_view_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+		android:layout_marginBottom="8dip"
         android:layout_weight="1"
         android:orientation="vertical" >
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+			android:gravity="right">
 
             <view xmlns:android="http://schemas.android.com/apk/res/android"
                 class="com.android.mms.ui.QuickContactDivot"
@@ -43,6 +46,12 @@
                 android:layout_width="@dimen/avatar_width_height"
                 android:layout_height="@dimen/avatar_width_height" />
 
+            <Space
+                android:id="@+id/message_space"
+                android:layout_width="@dimen/avatar_width_height"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"/>
+
             <LinearLayout
                 android:id="@+id/message_block"
                 android:minHeight="@dimen/avatar_width_height"
@@ -50,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@id/avatar"
                 android:layout_alignParentLeft="false"
-                android:background="@drawable/hairline_right"
+                android:background="@drawable/bubble_right"
                 android:orientation="vertical" >
 
                 <TextView android:id="@+id/text_view"
