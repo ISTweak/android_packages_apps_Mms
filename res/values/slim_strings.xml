@@ -231,6 +231,7 @@
     <string name="pref_mms_ua_sonyericsson_w800i">Sony Ericsson W800i</string>
     <string name="pref_mms_ua_softbank_x01t">SoftBank X01T</string>
     <string name="pref_mms_ua_softbank_myrmms">SoftBank MyrMMS</string>
+    <string name="pref_mms_ua_nexus5">Nexus 5</string>
     <string name="pref_mms_ua_custom_option">Custom\u2026</string>
     <string name="pref_title_mms_user_agent">User Agent</string>
     <string name="pref_summary_mms_user_agent">Spoof phone as a different model for MMS</string>
