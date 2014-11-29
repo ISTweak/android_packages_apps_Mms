@@ -45,7 +45,7 @@
   <string translatable="false" name="copy_to_sdcard_filename_fallback">mms</string>
   <!-- File name used to save a sound as a ringtone
     if the received location is not a valid file name -->
-  <string translatable="false" name="save_ringtone_filename_fallback">mms_ringtone</string>
+  <string translatable="false" name="save_ringtone_filename_fallback">mms</string>
   <string name="label_mms_push">MMSプッシュ</string>
   <string name="desc_mms_push">送信箱からネットワークにMMSをプッシュする</string>
   <!-- Extra Settings: -->
@@ -184,7 +184,7 @@
   <string name="no_recipients">連絡先が見つかりません</string>
   <!-- Text area -->
   <string name="pref_text_area_size_title">Text area size</string>
-  <string name="pref_text_area_size_summary">Set text area to <xliff:g id="lines">%1$s</xliff:g> lines</string>
+  <string name="pref_text_area_size_summary">Set text area to %1$s lines</string>
   <!-- Custom user-agent -->
   <string name="pref_mms_ua_default_android">Androidデフォルト</string>
   <string name="pref_mms_ua_nokia_n95">Nokia N95</string>
@@ -205,7 +205,7 @@
   <string name="pref_title_sms_multi_part_size">Multi-part SMS size</string>
   <string name="pref_summary_sms_multi_part_mms">Text messages over 160 chars will be sent as MMS</string>
   <string name="pref_summary_sms_multi_part">Text messages over 160 chars will be sent as Multi-part SMS</string>
-  <string name="pref_summary_sms_multi_part_mms_size">Text message will be converted to MMS after <xliff:g id="seg">%1$s</xliff:g> segments</string>
+  <string name="pref_summary_sms_multi_part_mms_size">Text message will be converted to MMS after %1$s segments</string>
   <!-- Split SMS -->
   <string name="pref_title_sms_split">Split SMS</string>
   <string name="pref_summary_sms_split">Text messages will be split to 160 char messages</string>
@@ -226,4 +226,16 @@
   <!-- Generic blacklist handling -->
   <string name="alert_dialog_yes">はい</string>
   <string name="alert_dialog_no">いいえ</string>
+  <!-- Speech bubbles -->
+  <string name="pref_mms_color">吹き出しの色を選択</string>
+  <string name="pref_mms_color_gray">グレー</string>
+  <string name="pref_mms_color_blue">ブルー</string>
+  <string name="pref_mms_color_green">グリーン</string>
+  <string name="pref_mms_color_pink">ピンク</string>
+  <string name="pref_title_hide_message_avatars">メッセージアバター非表示</string>
+  <string name="pref_summary_hide_message_avatars">メッセージスレッドのアバターを表示しない</string>
+  <string name="pref_title_hide_list_avatars">リストアバター非表示</string>
+  <string name="pref_summary_hide_list_avatars">会話リストのアバターを表示しない</string>
+  <string name="pref_back_image_title">背景画像</string>
+  <string name="pref_back_image_summary">背景画像を選択</string>
 </resources>

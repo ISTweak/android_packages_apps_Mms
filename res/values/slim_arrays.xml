@@ -34,6 +34,7 @@
         <item>SonyEricssonW800i/R1L</item>
         <item>SoftBank/1.0/X01T/TJ001</item>
         <item>SoftBank/1.0/Smart/MyrMMS</item>
+		<item>Nexus5</item>
         <item>@string/pref_mms_user_agent_custom</item>
     </string-array>
 
