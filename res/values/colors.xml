@@ -33,8 +33,8 @@
 	<color name="bubbles_bgcolor">#60f0f0f0</color>
 
     <!-- the background color used for unread conversation -->
-    <color name="unread_bgcolor">#ffffffff</color>
-    <color name="read_bgcolor">#ffeeeeee</color>
+    <color name="unread_bgcolor">#e0ffffff</color>
+    <color name="read_bgcolor">#a0f0f0f0</color>
 
     <color name="widget_sender_text_color_read">#555555</color>
     <color name="widget_sender_text_color_unread">#333333</color>
