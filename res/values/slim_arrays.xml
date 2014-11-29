@@ -23,6 +23,7 @@
         <item>@string/pref_mms_ua_sonyericsson_w800i</item>
         <item>@string/pref_mms_ua_softbank_x01t</item>
         <item>@string/pref_mms_ua_softbank_myrmms</item>
+		<item>@string/pref_mms_ua_nexus5</item>
         <item>@string/pref_mms_ua_custom_option</item>
     </string-array>
 
