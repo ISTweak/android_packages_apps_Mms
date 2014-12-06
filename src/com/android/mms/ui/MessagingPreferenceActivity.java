@@ -20,14 +20,17 @@ package com.android.mms.ui;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -241,6 +244,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mNotificationPrefCategory.setEnabled(mIsSmsEnabled);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mReceiver);
+    }
+
     private void loadPrefs() {
         addPreferencesFromResource(R.xml.preferences);
 
@@ -266,6 +275,11 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mMmsAutoRetrievialPref = (CheckBoxPreference) findPreference(AUTO_RETRIEVAL);
         mEnablePrivacyModePref = (CheckBoxPreference) findPreference(PRIVACY_MODE_ENABLED);
         mVibratePref = (CheckBoxPreference) findPreference(NOTIFICATION_VIBRATE);
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (mVibratePref != null && (vibrator == null || !vibrator.hasVibrator())) {
+            mNotificationPrefCategory.removePreference(mVibratePref);
+            mVibratePref = null;
+        }
         mRingtonePref = (RingtonePreference) findPreference(NOTIFICATION_RINGTONE);
 
         mManageTemplate = findPreference(MANAGE_TEMPLATES);
@@ -735,6 +749,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
     private void registerListeners() {
         mRingtonePref.setOnPreferenceChangeListener(this);
+        final IntentFilter intentFilter =
+                new IntentFilter(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        registerReceiver(mReceiver, intentFilter);
     }
 
     public boolean onPreferenceChange(Preference preference, Object newValue) {

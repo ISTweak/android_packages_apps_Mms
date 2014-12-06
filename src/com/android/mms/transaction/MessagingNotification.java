@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2010-2014, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  * Copyright (C) 2008 Esmertec AG.
  * Copyright (C) 2008 The Android Open Source Project
  * QuickMessage Copyright (C) 2012 The CyanogenMod Project (DvTonder)
@@ -28,6 +30,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.List;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -65,6 +68,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.mms.LogTag;
+import com.android.mms.MmsConfig;
 import com.android.mms.R;
 import com.android.mms.data.Contact;
 import com.android.mms.data.Conversation;
@@ -80,6 +84,7 @@ import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.util.AddressUtils;
 import com.android.mms.util.DownloadManager;
 import com.android.mms.widget.MmsWidgetProvider;
+
 import com.google.android.mms.MmsException;
 import com.google.android.mms.pdu.EncodedStringValue;
 import com.google.android.mms.pdu.GenericPdu;
@@ -108,11 +113,11 @@ public class MessagingNotification {
 
     // This must be consistent with the column constants below.
     private static final String[] MMS_STATUS_PROJECTION = new String[] {
-        Mms.THREAD_ID, Mms.DATE, Mms._ID, Mms.SUBJECT, Mms.SUBJECT_CHARSET };
+        Mms.THREAD_ID, Mms.DATE, Mms._ID, Mms.SUBJECT, Mms.SUBJECT_CHARSET, Mms.PHONE_ID };
 
     // This must be consistent with the column constants below.
     private static final String[] SMS_STATUS_PROJECTION = new String[] {
-        Sms.THREAD_ID, Sms.DATE, Sms.ADDRESS, Sms.SUBJECT, Sms.BODY };
+        Sms.THREAD_ID, Sms.DATE, Sms.ADDRESS, Sms.SUBJECT, Sms.BODY, Sms.PHONE_ID };
 
     // These must be consistent with MMS_STATUS_PROJECTION and
     // SMS_STATUS_PROJECTION.
@@ -123,6 +128,7 @@ public class MessagingNotification {
     private static final int COLUMN_SUBJECT     = 3;
     private static final int COLUMN_SUBJECT_CS  = 4;
     private static final int COLUMN_SMS_BODY    = 4;
+    private static final int COLUMN_PHONE_ID    = 5;
 
     private static final String[] SMS_THREAD_ID_PROJECTION = new String[] { Sms.THREAD_ID };
     private static final String[] MMS_THREAD_ID_PROJECTION = new String[] { Mms.THREAD_ID };
@@ -255,6 +261,16 @@ public class MessagingNotification {
             Contact.logWithTrace(TAG, "blockingUpdateNewMessageIndicator: newMsgThreadId: " +
                     newMsgThreadId);
         }
+        final boolean isDefaultSmsApp = MmsConfig.isSmsEnabled(context);
+        if (!isDefaultSmsApp) {
+            cancelNotification(context, NOTIFICATION_ID);
+            if (DEBUG || Log.isLoggable(LogTag.APP, Log.VERBOSE)) {
+                Log.d(TAG, "blockingUpdateNewMessageIndicator: not the default sms app - skipping "
+                        + "notification");
+            }
+            return;
+        }
+
         // notificationSet is kept sorted by the incoming message delivery time, with the
         // most recent message first.
         SortedSet<NotificationInfo> notificationSet =
@@ -644,6 +660,7 @@ public class MessagingNotification {
 
                 long threadId = cursor.getLong(COLUMN_THREAD_ID);
                 long timeMillis = cursor.getLong(COLUMN_DATE) * 1000;
+                int PhoneId = cursor.getInt(COLUMN_PHONE_ID);
 
                 if (Log.isLoggable(LogTag.APP, Log.VERBOSE)) {
                     Log.d(TAG, "addMmsNotificationInfos: count=" + cursor.getCount() +
@@ -680,7 +697,7 @@ public class MessagingNotification {
                         false /* isSms */,
                         address,
                         messageBody, subject,
-                        threadId,
+                        threadId, PhoneId,
                         timeMillis,
                         attachedPicture,
                         contact,
@@ -773,6 +790,7 @@ public class MessagingNotification {
                 String message = cursor.getString(COLUMN_SMS_BODY);
                 long threadId = cursor.getLong(COLUMN_THREAD_ID);
                 long timeMillis = cursor.getLong(COLUMN_DATE);
+                int phoneId = cursor.getInt(COLUMN_PHONE_ID);
 
                 if (Log.isLoggable(LogTag.APP, Log.VERBOSE))
                 {
@@ -783,7 +801,7 @@ public class MessagingNotification {
 
                 NotificationInfo info = getNewMessageNotificationInfo(context, true /* isSms */,
                         address, message, null /* subject */,
-                        threadId, timeMillis, null /* attachmentBitmap */,
+                        threadId, phoneId, timeMillis, null /* attachmentBitmap */,
                         contact, WorkingMessage.TEXT);
 
                 notificationSet.add(info);
@@ -803,6 +821,7 @@ public class MessagingNotification {
             String message,
             String subject,
             long threadId,
+            int phoneId,
             long timeMillis,
             Bitmap attachmentBitmap,
             Contact contact,
@@ -813,11 +832,11 @@ public class MessagingNotification {
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         String senderInfo = buildTickerMessage(
-                context, address, null, null).toString();
+                context, address, null, null, phoneId).toString();
         String senderInfoName = senderInfo.substring(
-                0, senderInfo.length() - 2);
+                0, senderInfo.length());
         CharSequence ticker = buildTickerMessage(
-                context, address, subject, message);
+                context, address, subject, message, phoneId);
 
         return new NotificationInfo(isSms,
                 clickIntent, message, subject, ticker, timeMillis,
@@ -972,6 +991,14 @@ public class MessagingNotification {
             .addKind(Notification.KIND_MESSAGE)
             .setPriority(Notification.PRIORITY_DEFAULT);     // TODO: set based on contact coming
                                                              // from a favorite.
+
+        // Tag notification with all senders.
+        for (NotificationInfo info : notificationSet) {
+            Uri peopleReferenceUri = info.mSender.getPeopleReferenceUri();
+            if (peopleReferenceUri != null) {
+                noti.addPerson(peopleReferenceUri.toString());
+            }
+        }
 
         int defaults = 0;
 
@@ -1194,7 +1221,7 @@ public class MessagingNotification {
     }
 
     protected static CharSequence buildTickerMessage(
-            Context context, String address, String subject, String body) {
+            Context context, String address, String subject, String body, int phoneId) {
         String displayAddress = Contact.get(address, true).getName();
 
         StringBuilder buf = new StringBuilder(
@@ -1202,6 +1229,17 @@ public class MessagingNotification {
                 ? ""
                 : displayAddress.replace('\n', ' ').replace('\r', ' '));
         buf.append(':').append(' ');
+
+        if ((TelephonyManager.getDefault().getPhoneCount()) > 1) {
+            //SMS/MMS is operating based of PhoneId which is 0, 1..
+            List<SubInfoRecord> sir = SubscriptionManager.getSubInfoUsingSlotId(phoneId);
+
+            String displayName = ((sir != null) && (sir.size() > 0)) ? sir.get(0).displayName : "";
+
+            Log.e(TAG, "PhoneID : " + phoneId + " displayName " + displayName);
+            buf.append(displayName);
+            buf.append("-");
+        }
 
         int offset = buf.length();
         if (!TextUtils.isEmpty(subject)) {

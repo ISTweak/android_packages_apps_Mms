@@ -29,6 +29,7 @@ import android.provider.Telephony.Mms.Inbox;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.mms.LogTag;
 import com.android.mms.MmsConfig;
 import com.android.mms.ui.MessageUtils;
 import com.android.mms.ui.MessagingPreferenceActivity;
@@ -58,7 +59,7 @@ import com.google.android.mms.pdu.RetrieveConf;
  * </ul>
  */
 public class RetrieveTransaction extends Transaction implements Runnable {
-    private static final String TAG = "RetrieveTransaction";
+    private static final String TAG = LogTag.TAG;
     private static final boolean DEBUG = false;
     private static final boolean LOCAL_LOGV = false;
 
@@ -128,9 +129,12 @@ public class RetrieveTransaction extends Transaction implements Runnable {
 
     public void run() {
         try {
+            DownloadManager downloadManager = DownloadManager.getInstance();
+            //Obtain Message Size from M-Notification.ind for original MMS
+            int msgSize = downloadManager.getMessageSize(mUri);
+
             // Change the downloading state of the M-Notification.ind.
-            DownloadManager.getInstance().markState(
-                    mUri, DownloadManager.STATE_DOWNLOADING);
+            downloadManager.markState( mUri, DownloadManager.STATE_DOWNLOADING);
 
             // Send GET request to MMSC and retrieve the response data.
             byte[] resp = getPdu(mContentLocation);
@@ -157,8 +161,23 @@ public class RetrieveTransaction extends Transaction implements Runnable {
                         MessagingPreferenceActivity.getIsGroupMmsEnabled(mContext), null);
 
                 // Use local time instead of PDU time
-                ContentValues values = new ContentValues(1);
+                ContentValues values = new ContentValues(3);
                 values.put(Mms.DATE, System.currentTimeMillis() / 1000L);
+                Cursor c = mContext.getContentResolver().query(mUri,
+                        null, null, null, null);
+                if (c != null) {
+                    try {
+                        if (c.moveToFirst()) {
+                            int phoneId = c.getInt(c.getColumnIndex(Mms.PHONE_ID));
+                            Log.d(TAG, "RetrieveTransaction: phoneId value is " + phoneId);
+                            values.put(Mms.PHONE_ID, phoneId);
+                        }
+                    } finally {
+                        c.close();
+                    }
+                }
+                // Update Message Size for Original MMS.
+                values.put(Mms.MESSAGE_SIZE, msgSize);
                 SqliteWrapper.update(mContext, mContext.getContentResolver(),
                         msgUri, values, null, null);
 

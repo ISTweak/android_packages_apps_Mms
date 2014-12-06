@@ -17,6 +17,7 @@
 
 package com.android.mms.ui;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +37,10 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract.Profile;
 import android.provider.Telephony.Sms;
+import android.provider.Telephony.Mms;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.SubscriptionManager;
+import android.telephony.SubInfoRecord;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
@@ -60,6 +64,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.mms.LogTag;
 import com.android.mms.MmsApp;
 import com.android.mms.R;
 import com.android.mms.data.Contact;
@@ -85,7 +90,7 @@ public class MessageListItem extends LinearLayout implements
         SlideViewInterface, OnClickListener {
     public static final String EXTRA_URLS = "com.android.mms.ExtraUrls";
 
-    private static final String TAG = "MessageListItem";
+    private static final String TAG = LogTag.TAG;
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_DONT_LOAD_IMAGES = false;
 
@@ -212,6 +217,7 @@ public class MessageListItem extends LinearLayout implements
                                 + mContext.getString(R.string.kilobyte);
 
         mBodyTextView.setText(formatMessage(mMessageItem, null,
+                                            mMessageItem.mPhoneId,
                                             mMessageItem.mSubject,
                                             mMessageItem.mHighlight,
                                             mMessageItem.mTextContentType));
@@ -239,6 +245,7 @@ public class MessageListItem extends LinearLayout implements
                 }
             case DownloadManager.STATE_TRANSIENT_FAILURE:
             case DownloadManager.STATE_PERMANENT_FAILURE:
+            case DownloadManager.STATE_SKIP_RETRYING:
             default:
                 setLongClickable(true);
                 inflateDownloadControls();
@@ -253,10 +260,12 @@ public class MessageListItem extends LinearLayout implements
                         intent.putExtra(TransactionBundle.URI, mMessageItem.mMessageUri.toString());
                         intent.putExtra(TransactionBundle.TRANSACTION_TYPE,
                                 Transaction.RETRIEVE_TRANSACTION);
+                        intent.putExtra(Mms.PHONE_ID, mMessageItem.mPhoneId); //destination Phone Id
+
                         mContext.startService(intent);
 
                         DownloadManager.getInstance().markState(
-                                    mMessageItem.mMessageUri, DownloadManager.STATE_PRE_DOWNLOADING);
+                                 mMessageItem.mMessageUri, DownloadManager.STATE_PRE_DOWNLOADING);
                     }
                 });
                 break;
@@ -350,6 +359,7 @@ public class MessageListItem extends LinearLayout implements
         if (formattedMessage == null) {
             formattedMessage = formatMessage(mMessageItem,
                                              mMessageItem.mBody,
+                                             mMessageItem.mPhoneId,
                                              mMessageItem.mSubject,
                                              mMessageItem.mHighlight,
                                              mMessageItem.mTextContentType);
@@ -554,7 +564,7 @@ public class MessageListItem extends LinearLayout implements
     ForegroundColorSpan mColorSpan = null;  // set in ctor
 
     private CharSequence formatMessage(MessageItem msgItem, String body,
-                                       String subject, Pattern highlight,
+                                       int phoneId, String subject, Pattern highlight,
                                        String contentType) {
         SpannableStringBuilder buf = new SpannableStringBuilder();
 

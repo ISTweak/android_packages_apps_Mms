@@ -25,6 +25,7 @@
         android:targetSdkVersion="19" />
 
     <original-package android:name="com.android.mms" />
+    <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -59,6 +60,7 @@
             android:label="@string/app_label"
             android:icon="@mipmap/ic_launcher_smsmms"
             android:taskAffinity="android.task.mms"
+            android:backupAgent="QTIBackupAgent"
             android:allowTaskReparenting="true">
 
         <service android:name=".transaction.TransactionService"
@@ -265,7 +267,8 @@
         </receiver>
 
         <!-- Catch-all receiver for broadcasts that don't have associated security -->
-        <receiver android:name=".transaction.SmsReceiver">
+        <receiver android:name=".transaction.SmsReceiver"
+             android:permission="android.permission.SEND_SMS">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="com.android.mms.action.REMOVE_BLACKLIST" />
@@ -274,6 +277,12 @@
                 <action android:name="com.android.mms.transaction.MESSAGE_SENT" />
                 <!-- TODO Do a better data match here. -->
                 <data android:scheme="content" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MESSAGE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.android.mms.transaction.SEND_MESSAGE" />
             </intent-filter>
         </receiver>
 

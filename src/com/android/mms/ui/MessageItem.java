@@ -59,7 +59,7 @@ import com.google.android.mms.pdu.SendReq;
  * the formatting of which is done outside this model in MessageListItem.
  */
 public class MessageItem {
-    private static String TAG = "MessageItem";
+    private static String TAG = LogTag.TAG;
 
     public enum DeliveryStatus  { NONE, INFO, FAILED, PENDING, RECEIVED }
 
@@ -78,6 +78,7 @@ public class MessageItem {
     String mAddress;
     String mContact;
     String mBody; // Body of SMS, first text of MMS.
+    int mPhoneId;   // Holds current mms/sms phone Id value.
     String mTextContentType; // ContentType of text of MMS.
     Pattern mHighlight; // portion of message to highlight (from search)
 
@@ -166,6 +167,7 @@ public class MessageItem {
             }
             mBody = cursor.getString(columnsMap.mColumnSmsBody);
 
+            mPhoneId = cursor.getInt(columnsMap.mColumnPhoneId);
             // Unless the message is currently in the progress of being sent, it gets a time stamp.
             if (!isOutgoingMessage()) {
                 // Set "received" or "sent" time stamp
@@ -184,6 +186,8 @@ public class MessageItem {
             mMessageType = cursor.getInt(columnsMap.mColumnMmsMessageType);
             mErrorType = cursor.getInt(columnsMap.mColumnMmsErrorType);
             String subject = cursor.getString(columnsMap.mColumnMmsSubject);
+            mPhoneId = cursor.getInt(columnsMap.mColumnPhoneId);
+
             if (!TextUtils.isEmpty(subject)) {
                 EncodedStringValue v = new EncodedStringValue(
                         cursor.getInt(columnsMap.mColumnMmsSubjectCharset),

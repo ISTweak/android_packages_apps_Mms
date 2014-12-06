@@ -35,6 +35,7 @@ import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
 import android.util.AttributeSet;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -43,6 +44,7 @@ import android.widget.MultiAutoCompleteTextView;
 
 import com.android.mms.ui.chips.RecipientEditTextView;
 import com.android.mms.MmsConfig;
+import com.android.mms.R;
 import com.android.mms.data.Contact;
 import com.android.mms.data.ContactList;
 
@@ -121,6 +123,13 @@ public class RecipientsEditor extends RecipientEditTextView {
                     }
                 }
                 mAffected = null;
+            }
+        });
+
+        setDropdownChipLayouter(new DropdownChipLayouter(LayoutInflater.from(context), context) {
+            @Override
+            protected int getItemLayoutResId(AdapterType type) {
+                return R.layout.mms_chips_recipient_dropdown_item;
             }
         });
     }

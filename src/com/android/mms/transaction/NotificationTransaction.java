@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.provider.Telephony.Mms;
@@ -37,6 +38,7 @@ import android.provider.Telephony.Mms.Inbox;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.android.mms.LogTag;
 import com.android.mms.MmsApp;
 import com.android.mms.MmsConfig;
 import com.android.mms.ui.MessagingPreferenceActivity;
@@ -69,7 +71,7 @@ import com.google.android.mms.pdu.PduPersister;
  * in case the client is in immediate retrieve mode.
  */
 public class NotificationTransaction extends Transaction implements Runnable {
-    private static final String TAG = "NotificationTransaction";
+    private static final String TAG = LogTag.TAG;
     private static final boolean DEBUG = false;
     private static final boolean LOCAL_LOGV = false;
 
@@ -189,8 +191,24 @@ public class NotificationTransaction extends Transaction implements Runnable {
                             MessagingPreferenceActivity.getIsGroupMmsEnabled(mContext), null);
 
                     // Use local time instead of PDU time
-                    ContentValues values = new ContentValues(1);
+                    ContentValues values = new ContentValues(3);
                     values.put(Mms.DATE, System.currentTimeMillis() / 1000L);
+                    Cursor c = mContext.getContentResolver().query(mUri,
+                            null, null, null, null);
+                    if (c != null) {
+                        try {
+                            if (c.moveToFirst()) {
+                                int phoneId = c.getInt(c.getColumnIndex(Mms.PHONE_ID));
+                                values.put(Mms.PHONE_ID, phoneId);
+                            }
+                        } catch (Exception ex) {
+                            Log.e(TAG, "Exception:" + ex);
+                        } finally {
+                            c.close();
+                        }
+                    }
+                    // Update Message Size for Original MMS.
+                    values.put(Mms.MESSAGE_SIZE, mNotificationInd.getMessageSize());
                     SqliteWrapper.update(mContext, mContext.getContentResolver(),
                             uri, values, null, null);
 

@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2010-2014, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  * Copyright (C) 2007-2008 Esmertec AG.
  * Copyright (C) 2007-2008 The Android Open Source Project
  *
@@ -50,10 +52,13 @@ import android.provider.Telephony.Sms.Outbox;
 import android.telephony.ServiceState;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.mms.LogTag;
 import com.android.mms.MmsConfig;
@@ -98,6 +103,7 @@ public class SmsReceiverService extends Service {
         Sms.ADDRESS,    //2
         Sms.BODY,       //3
         Sms.STATUS,     //4
+        Sms.PHONE_ID,   //5
 
     };
 
@@ -109,8 +115,8 @@ public class SmsReceiverService extends Service {
     private static final int SEND_COLUMN_ADDRESS    = 2;
     private static final int SEND_COLUMN_BODY       = 3;
     private static final int SEND_COLUMN_STATUS     = 4;
+    private static final int SEND_COLUMN_PHONE_ID   = 5;
 
-    private int mResultCode;
 
     // SMS sending delay
     private static Uri sCurrentSendingUri = Uri.EMPTY;
@@ -140,11 +146,11 @@ public class SmsReceiverService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Temporarily removed for this duplicate message track down.
 
-        mResultCode = intent != null ? intent.getIntExtra("result", 0) : 0;
+        int resultCode = intent != null ? intent.getIntExtra("result", 0) : 0;
 
-        if (mResultCode != 0) {
-            Log.v(TAG, "onStart: #" + startId + " mResultCode: " + mResultCode +
-                    " = " + translateResultCode(mResultCode));
+        if (resultCode != 0) {
+            Log.v(TAG, "onStart: #" + startId + " resultCode: " + resultCode +
+                    " = " + translateResultCode(resultCode));
         }
 
         Message msg = mServiceHandler.obtainMessage();
@@ -245,7 +251,13 @@ public class SmsReceiverService extends Service {
     private void handleServiceStateChanged(Intent intent) {
         // If service just returned, start sending out the queued messages
         ServiceState serviceState = ServiceState.newFromBundle(intent.getExtras());
-        if (serviceState.getState() == ServiceState.STATE_IN_SERVICE) {
+        long subId = intent.getLongExtra(PhoneConstants.SUBSCRIPTION_KEY, 0);
+        long prefSubId = SubscriptionManager.getDefaultSmsSubId();
+        // if service state is IN_SERVICE & current subscription is same as
+        // preferred SMS subscription.i.e.as set under SIM Settings, then
+        // sendFirstQueuedMessage.
+        if (serviceState.getState() == ServiceState.STATE_IN_SERVICE &&
+            subId == prefSubId) {
             sendFirstQueuedMessage();
         }
     }
@@ -331,6 +343,7 @@ public class SmsReceiverService extends Service {
                     int status = c.getInt(SEND_COLUMN_STATUS);
 
                     int msgId = c.getInt(SEND_COLUMN_ID);
+                    int phoneId = c.getInt(SEND_COLUMN_PHONE_ID);
                     Uri msgUri = ContentUris.withAppendedId(Sms.CONTENT_URI, msgId);
 
                     if (maybeDelaySendingAndCheckForCancel(msgUri)) {
@@ -339,7 +352,7 @@ public class SmsReceiverService extends Service {
 
                     SmsMessageSender sender = new SmsSingleRecipientSender(this,
                             address, msgText, threadId, status == Sms.STATUS_PENDING,
-                            msgUri);
+                            msgUri, phoneId);
 
                     if (LogTag.DEBUG_SEND ||
                             LogTag.VERBOSE ||
@@ -379,30 +392,31 @@ public class SmsReceiverService extends Service {
 
     private void handleSmsSent(Intent intent, int error) {
         Uri uri = intent.getData();
+        int resultCode = intent.getIntExtra("result", 0);
         mSending = false;
         boolean sendNextMsg = intent.getBooleanExtra(EXTRA_MESSAGE_SENT_SEND_NEXT, false);
 
         if (LogTag.DEBUG_SEND) {
             Log.v(TAG, "handleSmsSent uri: " + uri + " sendNextMsg: " + sendNextMsg +
-                    " mResultCode: " + mResultCode +
-                    " = " + translateResultCode(mResultCode) + " error: " + error);
+                    " resultCode: " + resultCode +
+                    " = " + translateResultCode(resultCode) + " error: " + error);
         }
 
-        if (mResultCode == Activity.RESULT_OK) {
-            if (LogTag.DEBUG_SEND || Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
-                Log.v(TAG, "handleSmsSent move message to sent folder uri: " + uri);
-            }
-            if (!Sms.moveMessageToFolder(this, uri, Sms.MESSAGE_TYPE_SENT, error)) {
-                Log.e(TAG, "handleSmsSent: failed to move message " + uri + " to sent folder");
-            }
+        if (resultCode == Activity.RESULT_OK) {
             if (sendNextMsg) {
+                if (LogTag.DEBUG_SEND || Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
+                    Log.v(TAG, "handleSmsSent: move message to sent folder uri: " + uri);
+                }
+                if (!Sms.moveMessageToFolder(this, uri, Sms.MESSAGE_TYPE_SENT, error)) {
+                    Log.e(TAG, "handleSmsSent: failed to move message " + uri + " to sent folder");
+                }
                 sendFirstQueuedMessage();
             }
 
             // Update the notification for failed messages since they may be deleted.
             MessagingNotification.nonBlockingUpdateSendFailedNotification(this);
-        } else if ((mResultCode == SmsManager.RESULT_ERROR_RADIO_OFF) ||
-                (mResultCode == SmsManager.RESULT_ERROR_NO_SERVICE)) {
+        } else if ((resultCode == SmsManager.RESULT_ERROR_RADIO_OFF) ||
+                (resultCode == SmsManager.RESULT_ERROR_NO_SERVICE)) {
             if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
                 Log.v(TAG, "handleSmsSent: no service, queuing message w/ uri: " + uri);
             }
@@ -418,8 +432,8 @@ public class SmsReceiverService extends Service {
                             Toast.LENGTH_SHORT).show();
                 }
             });
-        } else if (mResultCode == SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE) {
-            messageFailedToSend(uri, mResultCode);
+        } else if (resultCode == SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE) {
+            messageFailedToSend(uri, resultCode);
             mToastHandler.post(new Runnable() {
                 public void run() {
                     Toast.makeText(SmsReceiverService.this, getString(R.string.fdn_check_failure),
@@ -584,12 +598,19 @@ public class SmsReceiverService extends Service {
         ContentResolver resolver = context.getContentResolver();
         String originatingAddress = sms.getOriginatingAddress();
         int protocolIdentifier = sms.getProtocolIdentifier();
-        String selection =
-                Sms.ADDRESS + " = ? AND " +
-                Sms.PROTOCOL + " = ?";
-        String[] selectionArgs = new String[] {
-            originatingAddress, Integer.toString(protocolIdentifier)
-        };
+        String selection;
+        String[] selectionArgs;
+
+        if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
+            Log.v(TAG, " SmsReceiverService: replaceMessage:");
+        }
+        selection = Sms.ADDRESS + " = ? AND " +
+                    Sms.PROTOCOL + " = ? AND " +
+                    Sms.PHONE_ID +  " = ? ";
+        selectionArgs = new String[] {
+                originatingAddress, Integer.toString(protocolIdentifier),
+                Integer.toString(SubscriptionManager.getPhoneId(sms.getSubId()))
+            };
 
         Cursor cursor = SqliteWrapper.query(context, resolver, Inbox.CONTENT_URI,
                             REPLACE_PROJECTION, selection, selectionArgs, null);
@@ -625,6 +646,8 @@ public class SmsReceiverService extends Service {
         // Store the message in the content provider.
         ContentValues values = extractContentValues(sms);
         values.put(Sms.ERROR_CODE, error);
+        values.put(Sms.PHONE_ID, SubscriptionManager.getPhoneId(sms.getSubId()));
+
         int pduCount = msgs.length;
 
         if (pduCount == 1) {
@@ -731,11 +754,15 @@ public class SmsReceiverService extends Service {
      *
      */
     private void displayClassZeroMessage(Context context, SmsMessage sms, String format) {
+        long subId = sms.getSubId();
+        int phoneId = SubscriptionManager.getPhoneId(subId);
+
         // Using NEW_TASK here is necessary because we're calling
         // startActivity from outside an activity.
         Intent smsDialogIntent = new Intent(context, ClassZeroActivity.class)
                 .putExtra("pdu", sms.getPdu())
                 .putExtra("format", format)
+                .putExtra(PhoneConstants.PHONE_KEY, phoneId)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                           | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 
