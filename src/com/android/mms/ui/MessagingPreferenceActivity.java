@@ -37,7 +37,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -48,6 +47,7 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.RingtonePreference;
+import android.preference.SwitchPreference;
 import android.provider.SearchRecentSuggestions;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -138,6 +138,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // Privacy mode
     public static final String PRIVACY_MODE_ENABLED = "pref_key_enable_privacy_mode";
 
+    // Heads up mode
+    public static final String HEADS_UP_MODE_ENABLED = "pref_key_enable_heads_up_mode";
+
     // Keyboard input type
     public static final String INPUT_TYPE                = "pref_key_mms_input_type";
 
@@ -174,9 +177,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
     private Preference mSmsLimitPref;
     private Preference mSmsDeliveryReportPref;
-    private CheckBoxPreference mSmsSplitCounterPref;
-    private CheckBoxPreference mSmsSplitPref;
-    private CheckBoxPreference mSmsMultiPartPref;
+    private SwitchPreference mSmsSplitCounterPref;
+    private SwitchPreference mSmsSplitPref;
+    private SwitchPreference mSmsMultiPartPref;
     private Preference mSmsMultiPartSizePref;
     private Preference mMmsLimitPref;
     private Preference mMmsDeliveryReportPref;
@@ -184,9 +187,10 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private Preference mMmsReadReportPref;
     private Preference mManageSimPref;
     private Preference mClearHistoryPref;
-    private CheckBoxPreference mVibratePref;
-    private CheckBoxPreference mEnableNotificationsPref;
-    private CheckBoxPreference mEnablePrivacyModePref;
+    private SwitchPreference mVibratePref;
+    private SwitchPreference mEnableNotificationsPref;
+    private SwitchPreference mEnablePrivacyModePref;
+    private SwitchPreference mEnableHeadsUpModePref;
     private RingtonePreference mRingtonePref;
     private Recycler mSmsRecycler;
     private Recycler mMmsRecycler;
@@ -196,13 +200,13 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private CharSequence[] mUnicodeStrippingEntries;
     private static final int CONFIRM_CLEAR_SEARCH_HISTORY_DIALOG = 3;
 
-    private CheckBoxPreference mEnableEmojis;
-    private CheckBoxPreference mEnableQuickEmojis;
-    private CheckBoxPreference mSoftBankEmojis;
-    private CheckBoxPreference mFullTimestamp;
-    private CheckBoxPreference mSentTimestamp;
-    private CheckBoxPreference mShowGesture;
-    private CheckBoxPreference mHideAvatar;
+    private SwitchPreference mEnableEmojis;
+    private SwitchPreference mEnableQuickEmojis;
+    private SwitchPreference mSoftBankEmojis;
+    private SwitchPreference mFullTimestamp;
+    private SwitchPreference mSentTimestamp;
+    private SwitchPreference mShowGesture;
+    private SwitchPreference mHideAvatar;
     private ListPreference mMessageFontSize;
     private UserAgentListPreference mUserAgent;
 
@@ -212,15 +216,15 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private CharSequence[] mInputTypeValues;
 
     // QuickMessage
-    private CheckBoxPreference mEnableQuickMessagePref;
-    private CheckBoxPreference mEnableQmLockscreenPref;
-    private CheckBoxPreference mEnableQmCloseAllPref;
+    private SwitchPreference mEnableQuickMessagePref;
+    private SwitchPreference mEnableQmLockscreenPref;
+    private SwitchPreference mEnableQmCloseAllPref;
 
-    private CheckBoxPreference mDirectCall;
+    private SwitchPreference mDirectCall;
 
     private EditTextPreference mSignature;
     private String mSignatureText;
-    private CheckBoxPreference mMMSBreath;
+    private SwitchPreference mMMSBreath;
     private Preference mTextAreaSize;
 
     // Whether or not we are currently enabled for SMS. This field is updated in onResume to make
@@ -310,6 +314,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mVibratePref.setEnabled(mIsSmsEnabled);
         mEnableNotificationsPref.setEnabled(mIsSmsEnabled);
         mEnablePrivacyModePref.setEnabled(mIsSmsEnabled);
+        mEnableHeadsUpModePref.setEnabled(mIsSmsEnabled);
         mRingtonePref.setEnabled(mIsSmsEnabled);
         mManageTemplate.setEnabled(mIsSmsEnabled);
         mGestureSensitivity.setEnabled(mIsSmsEnabled);
@@ -349,10 +354,10 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mManageSimPref = findPreference("pref_key_manage_sim_messages");
         mSmsLimitPref = findPreference("pref_key_sms_delete_limit");
         mSmsDeliveryReportPref = findPreference("pref_key_sms_delivery_reports");
-        mSmsSplitCounterPref = (CheckBoxPreference) findPreference("pref_key_sms_split_counter");
-        mSmsSplitPref = (CheckBoxPreference) findPreference(PREF_SMS_SPLIT);
+        mSmsSplitCounterPref = (SwitchPreference) findPreference("pref_key_sms_split_counter");
+        mSmsSplitPref = (SwitchPreference) findPreference(PREF_SMS_SPLIT);
         mSmsSplitPref.setChecked(mSmsSplitPref.isChecked() || MmsConfig.getSplitSmsEnabled());
-        mSmsMultiPartPref = (CheckBoxPreference) findPreference(PREF_SMS_MULTI_PART_ENABLED);
+        mSmsMultiPartPref = (SwitchPreference) findPreference(PREF_SMS_MULTI_PART_ENABLED);
         mSmsMultiPartPref.setChecked(mSmsMultiPartPref.isChecked());
         mSmsMultiPartSizePref = findPreference(PREF_SMS_MULTI_PART_SIZE);
         setMultiPartSmsSummary();
@@ -361,10 +366,11 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mMmsReadReportPref = findPreference("pref_key_mms_read_reports");
         mMmsLimitPref = findPreference("pref_key_mms_delete_limit");
         mClearHistoryPref = findPreference("pref_key_mms_clear_history");
-        mDirectCall = (CheckBoxPreference) findPreference("direct_call_pref");
-        mEnableNotificationsPref = (CheckBoxPreference) findPreference(NOTIFICATION_ENABLED);
-        mEnablePrivacyModePref = (CheckBoxPreference) findPreference(PRIVACY_MODE_ENABLED);
-        mVibratePref = (CheckBoxPreference) findPreference(NOTIFICATION_VIBRATE);
+        mDirectCall = (SwitchPreference) findPreference("direct_call_pref");
+        mEnableNotificationsPref = (SwitchPreference) findPreference(NOTIFICATION_ENABLED);
+        mEnablePrivacyModePref = (SwitchPreference) findPreference(PRIVACY_MODE_ENABLED);
+        mEnableHeadsUpModePref = (SwitchPreference) findPreference(HEADS_UP_MODE_ENABLED);
+        mVibratePref = (SwitchPreference) findPreference(NOTIFICATION_VIBRATE);
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (mVibratePref != null && (vibrator == null || !vibrator.hasVibrator())) {
             mNotificationPrefCategory.removePreference(mVibratePref);
@@ -376,21 +382,21 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mUnicodeStripping = (ListPreference) findPreference(UNICODE_STRIPPING);
         mUnicodeStrippingEntries = getResources().getTextArray(R.array.pref_unicode_stripping_entries);
 
-        mEnableEmojis = (CheckBoxPreference) findPreference(ENABLE_EMOJIS);
-        mEnableQuickEmojis = (CheckBoxPreference) findPreference(ENABLE_QUICK_EMOJIS);
-        mSoftBankEmojis = (CheckBoxPreference) findPreference(SOFTBANK_EMOJIS);
+        mEnableEmojis = (SwitchPreference) findPreference(ENABLE_EMOJIS);
+        mEnableQuickEmojis = (SwitchPreference) findPreference(ENABLE_QUICK_EMOJIS);
+        mSoftBankEmojis = (SwitchPreference) findPreference(SOFTBANK_EMOJIS);
 
-        mFullTimestamp = (CheckBoxPreference) findPreference(FULL_TIMESTAMP);
-        mSentTimestamp = (CheckBoxPreference) findPreference(SENT_TIMESTAMP);
+        mFullTimestamp = (SwitchPreference) findPreference(FULL_TIMESTAMP);
+        mSentTimestamp = (SwitchPreference) findPreference(SENT_TIMESTAMP);
 
-        mShowGesture = (CheckBoxPreference) findPreference(SHOW_GESTURE);
+        mShowGesture = (SwitchPreference) findPreference(SHOW_GESTURE);
 
-        mHideAvatar = (CheckBoxPreference) findPreference(HIDE_AVATAR);
+        mHideAvatar = (SwitchPreference) findPreference(HIDE_AVATAR);
         mMessageFontSize = (ListPreference) findPreference(MESSAGE_FONT_SIZE);
 
         mUserAgent = (UserAgentListPreference) findPreference(USER_AGENT);
 
-        mMMSBreath = (CheckBoxPreference) findPreference(MMS_BREATH);
+        mMMSBreath = (SwitchPreference) findPreference(MMS_BREATH);
         mMMSBreath.setChecked(mMMSBreath.isChecked());
 
         mSignature = (EditTextPreference) findPreference(MSG_SIGNATURE);
@@ -400,9 +406,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mTextAreaSize = findPreference(PREF_TEXT_AREA_SIZE);
 
         // QuickMessage
-        mEnableQuickMessagePref = (CheckBoxPreference) findPreference(QUICKMESSAGE_ENABLED);
-        mEnableQmLockscreenPref = (CheckBoxPreference) findPreference(QM_LOCKSCREEN_ENABLED);
-        mEnableQmCloseAllPref = (CheckBoxPreference) findPreference(QM_CLOSE_ALL_ENABLED);
+        mEnableQuickMessagePref = (SwitchPreference) findPreference(QUICKMESSAGE_ENABLED);
+        mEnableQmLockscreenPref = (SwitchPreference) findPreference(QM_LOCKSCREEN_ENABLED);
+        mEnableQmCloseAllPref = (SwitchPreference) findPreference(QM_CLOSE_ALL_ENABLED);
 
         // Keyboard input type
         mInputTypePref = (ListPreference) findPreference(INPUT_TYPE);
@@ -695,6 +701,13 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mEnableQuickMessagePref.setEnabled(!isPrivacyModeEnabled);
     }
 
+    private void setEnabledHeadsUpModePref() {
+        // The "enable heads up mode" setting is really stored in our own prefs. Read the
+        // current value and set the checkbox to match.
+        boolean isHeadsUpModeEnabled = getHeadsUpModeEnabled(this);
+        mEnableHeadsUpModePref.setChecked(isHeadsUpModeEnabled);
+    }
+
     private void setEnabledQuickMessagePref() {
         // The "enable quickmessage" setting is really stored in our own prefs. Read the
         // current value and set the checkbox to match.
@@ -796,7 +809,6 @@ public class MessagingPreferenceActivity extends PreferenceActivity
                     R.string.pref_title_sms_multi_part).show();
 
         } else if (preference ==  mSmsMultiPartPref) {
-            mSmsMultiPartPref.setChecked(mSmsMultiPartPref.isChecked());
             setMultiPartSmsSummary();
 
         } else if (preference == mManageSimPref) {
@@ -817,8 +829,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             // Update "enable quickmessage" checkbox state
             mEnableQuickMessagePref.setEnabled(!mEnablePrivacyModePref.isChecked());
 
-        } else if (preference == mMMSBreath) {
-            mMMSBreath.setChecked(mMMSBreath.isChecked());
+        } else if (preference == mEnableHeadsUpModePref) {
+            // Update the actual "enable heads up mode" value that is stored in secure settings.
+            enableHeadsUpMode(mEnableHeadsUpModePref.isChecked(), this);
 
         } else if (preference == mTextAreaSize) {
             new NumberPickerDialog(this,
@@ -937,6 +950,21 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         SharedPreferences.Editor editor =
             PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putBoolean(MessagingPreferenceActivity.PRIVACY_MODE_ENABLED, enabled);
+        editor.apply();
+    }
+
+    public static boolean getHeadsUpModeEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean headsUpModeEnabled =
+            prefs.getBoolean(MessagingPreferenceActivity.HEADS_UP_MODE_ENABLED, true);
+        return headsUpModeEnabled;
+    }
+
+    public static void enableHeadsUpMode(boolean enabled, Context context) {
+        // Store the value of heads up mode in SharedPreferences
+        SharedPreferences.Editor editor =
+            PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean(MessagingPreferenceActivity.HEADS_UP_MODE_ENABLED, enabled);
         editor.apply();
     }
 
