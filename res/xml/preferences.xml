@@ -365,12 +365,12 @@
             android:title="@string/pref_back_image_title"
             android:summary="@string/pref_back_image_summary" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="pref_key_hide_message_avatars"
             android:title="@string/pref_title_hide_message_avatars"
             android:summary="@string/pref_summary_hide_message_avatars"
             android:defaultValue="false" />
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="pref_hide_avatar"
             android:title="@string/hide_avatar"
             android:summary="@string/hide_avatar_summary"
