@@ -195,4 +195,6 @@
     <string name="menu_conversation_options">会話のオプション</string>
     <string name="pref_title_reset_convopt_to_default">デフォルトに戻す</string>
     <string name="pref_summary_reset_convopt_to_default">会話の設定をアプリケーションレベルの設定にリセットする</string>
+	<string name="pref_title_mms_auto_enable_data">データ通信を自動で有効化</string>
+	<string name="pref_summary_mms_auto_enable_data">MMSメッセージを送受信するためにデータ通信を自動的に有効にする</string>
 </resources>
