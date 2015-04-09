@@ -44,7 +44,6 @@ import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -64,6 +63,7 @@ import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.contacts.common.util.BitmapUtil;
 import com.android.mms.LogTag;
 import com.android.mms.MmsConfig;
 import com.android.mms.R;
@@ -949,15 +949,9 @@ public class MessagingNotification {
                     final int idealIconHeight =
                         res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
                     final int idealIconWidth =
-                        res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
-                    if (avatar.getHeight() < idealIconHeight) {
-                        // Scale this image to fit the intended size
-                        avatar = Bitmap.createScaledBitmap(
-                            avatar, idealIconWidth, idealIconHeight, true);
-                    }
-                    if (avatar != null) {
-                        noti.setLargeIcon(avatar);
-                    }
+                            res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
+                    noti.setLargeIcon(BitmapUtil.getRoundedBitmap(avatar,
+                            idealIconWidth, idealIconHeight));
                 }
             } else {
                 if (messageCount > 1) {
