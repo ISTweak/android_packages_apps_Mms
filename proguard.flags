@@ -1,3 +1,5 @@
+-dontwar com.android.ex.**
+
  -keep class com.android.mms.ui.MmsThumbnailPresenter {
 *;
 }

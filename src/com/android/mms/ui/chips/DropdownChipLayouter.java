@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.android.mms.ui.chips.Queries.Query;
 
-import com.android.ex.chips.R;
+import com.android.mms.R;
 
 /**
  * A class that inflates and binds the views in the dropdown list from

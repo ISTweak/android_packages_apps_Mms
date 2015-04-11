@@ -144,7 +144,6 @@ import android.widget.Toolbar;
 
 import com.android.contacts.common.util.MaterialColorMapUtils;
 import com.android.contacts.common.util.MaterialColorMapUtils.MaterialPalette;
-import com.android.internal.telephony.util.BlacklistUtils;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.mms.LogTag;
@@ -2919,16 +2918,6 @@ public class ComposeMessageActivity extends Activity
 
         buildAddAddressToContactMenuItem(menu);
 
-        // Add to Blacklist item (if enabled) and we are running on Euphoria-OS
-        // This allows the app to be run on non-blacklist enabled roms (including Stock)
-        if (MessageUtils.isEos(this)) {
-            if (BlacklistUtils.isBlacklistEnabled(this)) {
-                menu.add(0, MENU_ADD_TO_BLACKLIST, 0, R.string.add_to_blacklist)
-                        .setIcon(R.drawable.ic_block_message_holo_dark)
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-            }
-        }
-
         if (mConversation.getThreadId() > 0) {
             menu.add(0, MENU_CONVERSATION_OPTIONS, 0, R.string.menu_conversation_options);
         }
@@ -3045,38 +3034,9 @@ public class ComposeMessageActivity extends Activity
             case MENU_ADD_TEMPLATE:
                 startLoadingTemplates();
                 break;
-            case MENU_ADD_TO_BLACKLIST:
-                confirmAddBlacklist();
-                break;
         }
 
         return true;
-    }
-
-    /**
-     *  Pop up a dialog confirming adding the current number to the blacklist
-     */
-    private void confirmAddBlacklist() {
-        //TODO: get the sender number
-        final String number = getSenderNumber();
-        if (TextUtils.isEmpty(number)) {
-            return;
-        }
-
-        // Show dialog
-        final String message = getString(R.string.add_to_blacklist_message, number);
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.add_to_blacklist)
-                .setMessage(message)
-                .setPositiveButton(R.string.alert_dialog_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        BlacklistUtils.addOrUpdate(getApplicationContext(), number,
-                                BlacklistUtils.BLOCK_MESSAGES, BlacklistUtils.BLOCK_MESSAGES);
-                    }
-                })
-                .setNegativeButton(R.string.alert_dialog_no, null)
-                .show();
     }
 
     private String getSenderNumber() {

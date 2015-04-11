@@ -106,7 +106,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.android.ex.chips.R;
+import com.android.mms.R;
 
 /**
  * RecipientEditTextView is an auto complete text view for use with applications

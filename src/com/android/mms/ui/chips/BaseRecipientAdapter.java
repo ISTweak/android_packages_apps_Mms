@@ -49,7 +49,6 @@ import java.util.Map;
 import java.util.Set;
 
 import android.provider.Telephony.Mms;
-import com.android.ex.chips.R;
 
 /**
  * Adapter for showing a recipient list.

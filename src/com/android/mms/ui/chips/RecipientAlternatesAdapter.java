@@ -47,8 +47,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.android.ex.chips.R;
-
 /**
  * RecipientAlternatesAdapter backs the RecipientEditTextView for managing contacts
  * queried by email or by phone number.

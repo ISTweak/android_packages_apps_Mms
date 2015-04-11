@@ -65,8 +65,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.QuickContactBadge;
 
-import com.android.contacts.common.widget.CheckableQuickContactBadge;
 import com.android.mms.LogTag;
 import com.android.mms.MmsApp;
 import com.android.mms.MmsConfig;
@@ -114,7 +114,7 @@ public class MessageListItem extends LinearLayout implements
     private String mDefaultCountryIso;
     private TextView mDateView;
     public View mMessageBlock;
-    private CheckableQuickContactBadge mAvatar;
+    private QuickContactBadge mAvatar;
     static private RoundedBitmapDrawable sDefaultContactImage;
     private Presenter mPresenter;
     private int mPosition;      // for debugging
@@ -151,7 +151,7 @@ public class MessageListItem extends LinearLayout implements
         mLockedIndicator = (ImageView) findViewById(R.id.locked_indicator);
         mDeliveredIndicator = (ImageView) findViewById(R.id.delivered_indicator);
         mDetailsIndicator = (ImageView) findViewById(R.id.details_indicator);
-        mAvatar = (CheckableQuickContactBadge) findViewById(R.id.avatar);
+        mAvatar = (QuickContactBadge) findViewById(R.id.avatar);
         mMessageBlock = findViewById(R.id.message_block);
 
         mAvatar.setOverlay(null);
@@ -186,7 +186,6 @@ public class MessageListItem extends LinearLayout implements
         }
         tintBackground(mMessageBlock.getBackground(), accentColor);
         mMessageBlock.setSelected(selected);
-        mAvatar.setChecked(selected, sameItem);
     }
 
     private void tintBackground(Drawable background, int color) {
