@@ -355,4 +355,7 @@
     <string name="banner_sms_promo_title_initial" msgid="510014388581481569">"SMSをSMSアプリとして利用していません"</string>
     <string name="banner_sms_promo_title_application" msgid="8123569785369713254">"<xliff:g id="APPNAME">%s</xliff:g>をSMSアプリとして利用しています"</string>
     <string name="banner_sms_promo_message" msgid="3536714414252763826">"これは[設定]で変更できます。"</string>
+
+	<string name="pref_back_image_title">背景画像</string>
+	<string name="pref_back_image_summary">背景画像を選択</string>
 </resources>

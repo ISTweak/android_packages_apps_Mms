@@ -23,7 +23,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
@@ -45,6 +50,10 @@ import android.widget.ListView;
 import com.android.mms.LogTag;
 import com.android.mms.R;
 import com.google.android.mms.MmsException;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * The back-end data adapter of a message list.
@@ -131,6 +140,7 @@ public class MessageListAdapter extends CursorAdapter {
     private boolean mFullTimestamp;
     private boolean mSentTimestamp;
     private int mAccentColor = 0;
+	private String mBgImage;
 
     public MessageListAdapter(
             Context context, Cursor c, ListView listView,
@@ -153,6 +163,20 @@ public class MessageListAdapter extends CursorAdapter {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         mFullTimestamp = prefs.getBoolean(MessagingPreferenceActivity.FULL_TIMESTAMP, false);
         mSentTimestamp = prefs.getBoolean(MessagingPreferenceActivity.SENT_TIMESTAMP, false);
+        mBgImage = prefs.getString(MessagingPreferenceActivity.BG_IMAGE, "");
+        if ( mBgImage.length() > 0 ) {
+            try {
+                InputStream in = context.openFileInput(mBgImage);
+                Bitmap bitmapimg = BitmapFactory.decodeStream(in);
+                in.close();
+                Drawable drawable = new BitmapDrawable(context.getResources(), bitmapimg);
+                listView.setBackground(drawable);
+            } catch (FileNotFoundException e) {
+                Log.e("MMS", e.toString());
+            } catch (IOException e) {
+                Log.e("MMS", e.toString());
+            }
+        }
 
         listView.setRecyclerListener(new AbsListView.RecyclerListener() {
             @Override
@@ -181,11 +205,11 @@ public class MessageListAdapter extends CursorAdapter {
                 final int accentColor;
 
                 if (boxType == OUTGOING_ITEM_TYPE_SMS || boxType == OUTGOING_ITEM_TYPE_MMS) {
-                    accentColor = res.getColor(R.color.outgoing_message_bg);
+                    accentColor = setAlpha(res.getColor(R.color.outgoing_message_bg), 178);
                 } else if (mAccentColor != 0) {
-                    accentColor = mAccentColor;
+                    accentColor = setAlpha(mAccentColor, 178);
                 } else {
-                    accentColor = res.getColor(R.color.incoming_message_bg_default);
+                    accentColor = setAlpha(res.getColor(R.color.incoming_message_bg_default), 178);
                 }
 
                 mli.bind(msgItem, accentColor, mIsGroupConversation, position,
@@ -194,6 +218,13 @@ public class MessageListAdapter extends CursorAdapter {
             }
         }
     }
+	
+	private int setAlpha(int color, int alpha) {
+	    if (alpha < 0 || 255 < alpha) return color;
+		float[] hsv = new float[3];
+	    Color.colorToHSV(color, hsv);
+	    return Color.HSVToColor(alpha, hsv);
+	}
 
     public interface OnDataSetChangedListener {
         void onDataSetChanged(MessageListAdapter adapter);

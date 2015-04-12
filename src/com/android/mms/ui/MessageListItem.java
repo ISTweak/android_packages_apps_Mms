@@ -44,12 +44,15 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.text.Html;
+import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.LineHeightSpan;
+import android.text.style.AlignmentSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
 import android.text.style.URLSpan;
@@ -112,7 +115,6 @@ public class MessageListItem extends LinearLayout implements
     private Handler mHandler;
     private MessageItem mMessageItem;
     private String mDefaultCountryIso;
-    private TextView mDateView;
     public View mMessageBlock;
     private QuickContactBadge mAvatar;
     static private RoundedBitmapDrawable sDefaultContactImage;
@@ -147,7 +149,6 @@ public class MessageListItem extends LinearLayout implements
 
         mBodyTextView = (TextView) findViewById(R.id.text_view);
         mBodyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getContext()).getString(MessagingPreferenceActivity.MESSAGE_FONT_SIZE, "18")));
-        mDateView = (TextView) findViewById(R.id.date_view);
         mLockedIndicator = (ImageView) findViewById(R.id.locked_indicator);
         mDeliveredIndicator = (ImageView) findViewById(R.id.delivered_indicator);
         mDetailsIndicator = (ImageView) findViewById(R.id.details_indicator);
@@ -238,9 +239,8 @@ public class MessageListItem extends LinearLayout implements
         mBodyTextView.setText(formatMessage(mMessageItem, null,
                                             mMessageItem.mSubject,
                                             mMessageItem.mHighlight,
-                                            mMessageItem.mTextContentType));
-
-        mDateView.setText(buildTimestampLine(msgSizeText + " " + mMessageItem.mTimestamp));
+                                            mMessageItem.mTextContentType,
+											buildTimestampLine(msgSizeText + " " + mMessageItem.mTimestamp)));
 
         switch (mMessageItem.getMmsDownloadStatus()) {
             case DownloadManager.STATE_PRE_DOWNLOADING:
@@ -354,6 +354,20 @@ public class MessageListItem extends LinearLayout implements
             String addr = isSelf ? null : mMessageItem.mAddress;
             updateAvatarView(addr, isSelf);
         }
+		
+		// If we're in the process of sending a message (i.e. pending), then we show a "SENDING..."
+        // string in place of the timestamp.
+		String mTimeS = "";
+        if (!sameItem || haveLoadedPdu) {
+			boolean isCountingDown = mMessageItem.getCountDown() > 0 &&
+                    MessagingPreferenceActivity.getMessageSendDelayDuration(mContext) > 0;
+            int sendingTextResId = isCountingDown
+                    ? R.string.sent_countdown : R.string.sending_message;
+
+			mTimeS = buildTimestampLine(mMessageItem.isSending() ?
+                    mContext.getResources().getString(sendingTextResId) :
+                    mMessageItem.mTimestamp);
+        }
 
         // Get and/or lazily set the formatted message from/on the
         // MessageItem.  Because the MessageItem instances come from a
@@ -365,7 +379,8 @@ public class MessageListItem extends LinearLayout implements
                                              mMessageItem.mBody,
                                              mMessageItem.mSubject,
                                              mMessageItem.mHighlight,
-                                             mMessageItem.mTextContentType);
+                                             mMessageItem.mTextContentType,
+											 mTimeS);
             mMessageItem.setCachedFormattedMessage(formattedMessage);
         }
         if (!sameItem || haveLoadedPdu) {
@@ -390,18 +405,6 @@ public class MessageListItem extends LinearLayout implements
             mBodyTextView.setText(mPosition + ": " + debugText);
         }
 
-        // If we're in the process of sending a message (i.e. pending), then we show a "SENDING..."
-        // string in place of the timestamp.
-        if (!sameItem || haveLoadedPdu) {
-            boolean isCountingDown = mMessageItem.getCountDown() > 0 &&
-                    MessagingPreferenceActivity.getMessageSendDelayDuration(mContext) > 0;
-            int sendingTextResId = isCountingDown
-                    ? R.string.sent_countdown : R.string.sending_message;
-
-            mDateView.setText(buildTimestampLine(mMessageItem.isSending() ?
-                    mContext.getResources().getString(sendingTextResId) :
-                    mMessageItem.mTimestamp));
-        }
         if (mMessageItem.isSms()) {
             showMmsView(false);
             mMessageItem.setOnPduLoaded(null);
@@ -568,7 +571,7 @@ public class MessageListItem extends LinearLayout implements
 
     private CharSequence formatMessage(MessageItem msgItem, String body,
                                        String subject, Pattern highlight,
-                                       String contentType) {
+                                       String contentType, String TimeStamp) {
         SpannableStringBuilder buf = new SpannableStringBuilder();
 
         boolean hasSubject = !TextUtils.isEmpty(subject);
@@ -595,6 +598,18 @@ public class MessageListItem extends LinearLayout implements
                 buf.setSpan(new StyleSpan(Typeface.BOLD), m.start(), m.end(), 0);
             }
         }
+		
+		if (!TextUtils.isEmpty(TimeStamp)) {
+			buf.append("\n\n");
+			int start = buf.length();
+			buf.append("Date: " + TimeStamp);
+			int end = buf.length();
+			RelativeSizeSpan span = new RelativeSizeSpan(0.75f);
+			buf.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+			AlignmentSpan.Standard right_span = new AlignmentSpan.Standard(Layout.Alignment.ALIGN_OPPOSITE);
+			buf.setSpan(right_span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
         return buf;
     }
 
@@ -868,16 +883,5 @@ public class MessageListItem extends LinearLayout implements
     }
 
     public void updateDelayCountDown() {
-        if (mMessageItem.isSms() && mMessageItem.getCountDown() > 0 && mMessageItem.isSending()) {
-            String content = mContext.getResources().getQuantityString(
-                    R.plurals.remaining_delay_time,
-                    mMessageItem.getCountDown(), mMessageItem.getCountDown());
-            Spanned spanned = Html.fromHtml(buildTimestampLine(content));
-            mDateView.setText(spanned);
-        } else {
-            mDateView.setText(buildTimestampLine(mMessageItem.isSending()
-                ? mContext.getResources().getString(R.string.sending_message)
-                : mMessageItem.mTimestamp));
-        }
     }
 }
